@@ -1,5 +1,6 @@
-package com.ryulth.auction.pojo;
+package com.ryulth.auction.pojo.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
-@AllArgsConstructor() // Lombok builder use this
+@AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class ProductDataRequest {
     private String name;
     private String spec;

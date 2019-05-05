@@ -1,5 +1,6 @@
-package com.ryulth.auction.pojo;
+package com.ryulth.auction.pojo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ryulth.auction.domain.Product;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
-@AllArgsConstructor // Lombok builder use this
+@AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEventStream {
     private Product product;
 

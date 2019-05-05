@@ -1,6 +1,8 @@
 package com.ryulth.auction.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.mysql.cj.protocol.ColumnDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +18,7 @@ import java.time.ZonedDateTime;
 @Builder
 @AllArgsConstructor() // Lombok builder use this
 @Table(name = "products")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
     @Id
     @GeneratedValue
@@ -35,6 +38,11 @@ public class Product {
     private Long lowerLimit;
 
     @Column
+    private int flag;
+
+    @Column(columnDefinition = "TINYINT(1)")
+    private int onAuction;
+    @Column
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createTime;
 
@@ -48,9 +56,10 @@ public class Product {
 
     @PrePersist
     void setUp(){
+        this.flag = 1 ;
+        this.onAuction = 0;
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
-        ZoneOffset seoulZoneOffset = ZoneOffset.of("+09:00");
-        this.createTime = ZonedDateTime.now(seoulZoneOffset);
+        this.createTime = ZonedDateTime.now(seoulZoneId);
     }
 
     protected Product(){}
