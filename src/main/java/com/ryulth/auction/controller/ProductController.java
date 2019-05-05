@@ -10,20 +10,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AuctionController {
+public class ProductController {
     private static Logger logger = LoggerFactory.getLogger(AuctionController.class);
     @Autowired
     AuctionService auctionService;
 
-    @GetMapping("/auctions")
-    public String getAllAuctions(){
+    @GetMapping("/products")
+    public String getAllProducts(){
         return auctionService.getAllAuctions();
     }
 
-    @PostMapping("/auction")
-    public void postAuction(@RequestBody String reqBody){
-        logger.info("POST pAuction",reqBody);
+    @PostMapping("/product")
+    public void postProduct(@RequestBody String reqBody){
+        logger.info("POST product",reqBody);
         auctionService.enrollAuction();
     }
-
 }

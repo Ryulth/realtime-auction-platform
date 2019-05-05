@@ -32,9 +32,18 @@ public class Product {
 
     @Column
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private ZonedDateTime createTime;
+
+    @Column
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime startTime;
 
     @Column
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime endTime;
+
+    @PrePersist
+    void setUp(){
+        this.createTime = ZonedDateTime.now();
+    }
 }

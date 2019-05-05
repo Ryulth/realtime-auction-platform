@@ -7,22 +7,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.time.ZonedDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
-public class Auction {
-    private String id; // uuid
-    Product product;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private ZonedDateTime startTime;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private ZonedDateTime endTime;
+public class AuctionEvent {
+    private Long version; // uuid
+    private AuctionEventType auctionEventType;
+    private Long price;
 }
