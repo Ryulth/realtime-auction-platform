@@ -1,13 +1,20 @@
 package com.ryulth.auction.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor() // Lombok builder use this
 @Table(name = "products")
 public class Product {
     @Id
@@ -22,13 +29,10 @@ public class Product {
     private String spec;
 
     @Column
-    private Long version;
+    private Long upperLimit;
 
     @Column
-    private Long UpperLimit;
-
-    @Column
-    private Long LowerLimit;
+    private Long lowerLimit;
 
     @Column
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -44,6 +48,10 @@ public class Product {
 
     @PrePersist
     void setUp(){
-        this.createTime = ZonedDateTime.now();
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        ZoneOffset seoulZoneOffset = ZoneOffset.of("+09:00");
+        this.createTime = ZonedDateTime.now(seoulZoneOffset);
     }
+
+    protected Product(){}
 }
