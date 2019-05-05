@@ -1,0 +1,48 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.1.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group 'com.ryulth.auction'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter')
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    /* needs compile */
+    compile("org.springframework.boot:spring-boot-devtools") // 개발용 서버 버젼에 필요한 도구들
+    compile('org.springframework.boot:spring-boot-starter-web') // RestController
+    compile('org.springframework.boot:spring-boot-starter-data-jpa') // JPA
+    runtime('com.h2database:h2')
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.7' // GSON
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.16.20' // 롬복
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql 8버젼 임으로 8 설정
+    compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
+//    compile("org.webjars:sockjs-client:1.0.2") // 클라용 websocket
+//    compile("org.webjars:stomp-websocket:2.3.3") // 클라용 websocket
+//    compile("org.webjars:webjars-locator-core") // // 클라용 websocket
+//    compile("org.webjars:bootstrap:3.3.7") // 클라용 js
+//    compile("org.webjars:jquery:3.1.0") // 클라용 js
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.6' //jackson
+
+}
