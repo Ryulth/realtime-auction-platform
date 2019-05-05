@@ -1,6 +1,5 @@
-package com.ryulth.auction.pojo.model;
+package com.ryulth.auction.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ryulth.auction.domain.Product;
 import lombok.AllArgsConstructor;

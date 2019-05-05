@@ -1,4 +1,4 @@
-package com.ryulth.auction.pojo.model;
+package com.ryulth.auction.pojo;
 
 import java.util.Arrays;
 

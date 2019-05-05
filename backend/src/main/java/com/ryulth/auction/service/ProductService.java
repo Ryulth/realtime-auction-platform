@@ -9,4 +9,5 @@ import java.io.IOException;
 public interface ProductService {
     void enrollProduct(String payload) throws IOException;
     String getAllProducts() throws JsonProcessingException;
+    String getOneProducts(Long productId) throws JsonProcessingException;
 }

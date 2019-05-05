@@ -1,8 +1,6 @@
-package com.ryulth.auction.pojo.model;
+package com.ryulth.auction.pojo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.ryulth.auction.domain.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +10,12 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
-@AllArgsConstructor // Lombok builder use this
-public class AuctionEvent {
-    private Long version; // uuid
-    private AuctionEventType auctionEventType;
-    private Long price;
+@AllArgsConstructor() // Lombok builder use this
+public class ProductDataRequest {
+    private String name;
+    private String spec;
+    private Long upperLimit;
+    private Long lowerLimit;
+    private String startTime;
+    private String endTime;
 }
