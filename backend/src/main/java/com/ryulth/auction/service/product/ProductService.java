@@ -1,4 +1,4 @@
-package com.ryulth.auction.service;
+package com.ryulth.auction.service.product;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;

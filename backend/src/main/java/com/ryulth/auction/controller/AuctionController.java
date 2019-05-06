@@ -1,13 +1,13 @@
 package com.ryulth.auction.controller;
 
-import com.ryulth.auction.service.AuctionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ryulth.auction.service.auction.AuctionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 public class AuctionController {
@@ -16,14 +16,13 @@ public class AuctionController {
     AuctionService auctionService;
 
     @GetMapping("/auctions")
-    public String getAllAuctions(){
+    public String getAllAuctions() throws JsonProcessingException {
         return auctionService.getAllAuctions();
     }
 
     @PostMapping("/auction")
-    public void postAuction(@RequestBody String reqBody){
-        logger.info("POST pAuction",reqBody);
-        auctionService.enrollAuction();
+    public String enrollAuction(
+            @RequestBody String payload) throws IOException {
+        return auctionService.enrollAuction(payload);
     }
-
 }

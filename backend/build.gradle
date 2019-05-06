@@ -36,13 +36,11 @@ dependencies {
     runtime('com.h2database:h2')
     annotationProcessor "org.projectlombok:lombok:1.16.16" // 이전 gradle 버젼은 설정해줘야 한다.
     compile group: 'org.projectlombok', name: 'lombok', version: '1.16.20' // 롬복
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql 8버젼 임으로 8 설정
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '1.4.0.RELEASE'
+    compile group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
+//    compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.3'
     compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
-//    compile("org.webjars:sockjs-client:1.0.2") // 클라용 websocket
-//    compile("org.webjars:stomp-websocket:2.3.3") // 클라용 websocket
-//    compile("org.webjars:webjars-locator-core") // // 클라용 websocket
-//    compile("org.webjars:bootstrap:3.3.7") // 클라용 js
-//    compile("org.webjars:jquery:3.1.0") // 클라용 js
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.6' //jackson
 
 }

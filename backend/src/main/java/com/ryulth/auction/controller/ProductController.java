@@ -3,7 +3,7 @@ package com.ryulth.auction.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
-import com.ryulth.auction.service.ProductService;
+import com.ryulth.auction.service.product.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

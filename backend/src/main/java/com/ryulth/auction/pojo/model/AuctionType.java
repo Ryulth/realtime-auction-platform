@@ -2,17 +2,14 @@ package com.ryulth.auction.pojo.model;
 
 import java.util.Arrays;
 
-public enum AuctionEventType {
-    ENROLL("enroll"),
-    START("start"),
-    CLOSE("close"),
-    BID("bid"), // 입찰
-    OUTBID("outbid"), // 즉시 구매
+public enum  AuctionType {
+    BIDDING("bidding"), // 비딩 방식
+    COMPETE("compete"), // 경쟁 방식
     ERROR("error");
 
     private final String value;
 
-    AuctionEventType(String value) {
+    AuctionType(String value) {
         this.value = value;
     }
 
@@ -25,10 +22,10 @@ public enum AuctionEventType {
         return this.value;
     }
 
-    public static AuctionEventType fromText(String text) {
+    public static AuctionType fromText(String text) {
         return Arrays.stream(values())
                 .filter(bl -> bl.value.equalsIgnoreCase(text))
                 .findFirst()
-                .orElse(AuctionEventType.ERROR);
+                .orElse(AuctionType.ERROR);
     }
 }
