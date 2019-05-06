@@ -17,9 +17,10 @@ import java.time.ZonedDateTime;
 @Data
 @Builder
 @AllArgsConstructor() // Lombok builder use this
-@Table(name = "products")
+@Table(name = "auctions")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
+    protected Product(){}
     @Id
     @GeneratedValue
     private Long id;
@@ -61,6 +62,4 @@ public class Product {
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
         this.createTime = ZonedDateTime.now(seoulZoneId);
     }
-
-    protected Product(){}
 }

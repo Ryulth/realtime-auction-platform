@@ -3,6 +3,7 @@ package com.ryulth.auction.pojo.request;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ryulth.auction.domain.Product;
+import com.ryulth.auction.pojo.model.AuctionEventType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEventRequest {
     private String auctionEventType;
-    private String auctionId;
-
-    private Product product;
+    private Long price;
+    @JsonIgnore
+    public AuctionEventType getAuctionEventTypeEnum(){
+        return AuctionEventType.fromText(this.auctionEventType);
+    }
 }

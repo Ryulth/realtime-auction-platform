@@ -16,18 +16,22 @@ import java.time.ZonedDateTime;
 @Table(name = "products")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Auction {
+    protected Auction(){}
     @Id
     @GeneratedValue
     private Long id;
 
     @Column
-    private String AuctionId;
+    private String auctionId;
 
     @Column
     private Long productId;
 
     @Column
     private Long price;
+
+    @Column
+    private Long version;
 
     @Column
     private String auctionType;
