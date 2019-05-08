@@ -30,7 +30,6 @@ public class RedisConfig {
         jedisConnectionFactory.setHostName(redisHost);
         jedisConnectionFactory.setPort(redisPort);
         jedisConnectionFactory.setPassword(password);
-        jedisConnectionFactory.setUsePool(true);
         return jedisConnectionFactory;
     }
 

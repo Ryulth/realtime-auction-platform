@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
+import com.ryulth.auction.pojo.request.AuctionEventRequest;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.service.auction.AuctionService;
@@ -33,7 +34,7 @@ public class AuctionController {
     @GetMapping("/auctions")
     public ResponseEntity<AuctionListResponse> getAllAuctions() throws JsonProcessingException {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(auctionService.getAllAuctions(),httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.getAllAuctions(), httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/auctions/{auctionType}/{auctionId}/events")
@@ -41,7 +42,7 @@ public class AuctionController {
             @PathVariable("auctionType") String auctionType,
             @PathVariable("auctionId") String auctionId) throws JsonProcessingException {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId, AuctionType.fromText(auctionType)),httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId, AuctionType.fromText(auctionType)), httpHeaders, HttpStatus.OK);
     }
 
     @PostMapping("/auction")
@@ -58,7 +59,9 @@ public class AuctionController {
             @RequestBody String payload,
             @PathVariable("auctionType") String auctionType,
             @PathVariable("auctionId") String auctionId) throws IOException {
+        AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .readValue(payload, AuctionEventRequest.class);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return auctionService.eventAuction(auctionId,auctionType, payload);
+        return auctionService.eventAuction(auctionId, AuctionType.fromText(auctionType),auctionEventRequest);
     }
 }

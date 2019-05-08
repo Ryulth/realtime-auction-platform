@@ -3,6 +3,7 @@ package com.ryulth.auction.service.auction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
+import com.ryulth.auction.pojo.request.AuctionEventRequest;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,6 @@ public interface AuctionService {
 
     AuctionEventsResponse getAuctionEvents(String auctionId, AuctionType auctionType);
 
-    String eventAuction(String auctionId, String auctionType, String payload) throws IOException;
+    String eventAuction(String auctionId, AuctionType auctionType, AuctionEventRequest auctionEventRequest) throws IOException;
 
 }

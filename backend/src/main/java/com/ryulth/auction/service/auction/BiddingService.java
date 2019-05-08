@@ -8,6 +8,7 @@ import com.ryulth.auction.pojo.model.AuctionEventStreams;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
+import com.ryulth.auction.pojo.request.AuctionEventRequest;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
@@ -83,7 +84,7 @@ public class BiddingService implements AuctionService {
     }
 
     @Override
-    public String eventAuction(String auctionId, String auctionType, String payload) throws IOException {
+    public String eventAuction(String auctionId, AuctionType auctionType, AuctionEventRequest auctionEventRequest) throws IOException {
         AuctionEventStreams auctionEventStreams;
         synchronized (biddingAuctionMap) {
             auctionEventStreams = biddingAuctionMap.get(auctionId);
@@ -94,9 +95,9 @@ public class BiddingService implements AuctionService {
         ArrayDeque<AuctionEvent> auctionEvents = auctionEventStreams.getAuctionEvents();
         Long serverVersion = auctionEvents.getLast().getVersion();
         auctionEvents.add(AuctionEvent.builder()
-                .auctionEventType(AuctionEventType.ENROLL)
+                .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
                 .version(serverVersion+1)
-                .price(auctionEvents.getLast().getPrice()+1000) // TODO 임시로 1000원씩 입찰
+                .price(auctionEventRequest.getPrice())//auctionEvents.getLast().getPrice()+1000) // TODO 임시로 1000원씩 입찰
                 .build());
         return serverVersion.toString();
     }
