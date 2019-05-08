@@ -4,6 +4,7 @@ package com.ryulth.auction.pojo.request;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ryulth.auction.domain.Product;
+import com.ryulth.auction.pojo.model.AuctionType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class AuctionEnrollRequest {
     private String auctionType;
     private Long productId;
     @JsonIgnore
-    public String getAuctionTypeKey(){
-        return this.auctionType + "EventService";
+    public AuctionType getAuctionTypeEnum(){
+        return AuctionType.fromText(this.auctionType);
     }
 }

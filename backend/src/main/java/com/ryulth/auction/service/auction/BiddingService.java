@@ -1,29 +1,38 @@
 package com.ryulth.auction.service.auction;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
-import com.ryulth.auction.pojo.model.AuctionEventStreams;
 import com.ryulth.auction.pojo.model.AuctionEvent;
+import com.ryulth.auction.pojo.model.AuctionEventStreams;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
+import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
+import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-@Component
-public class BiddingEventService implements AuctionEventService {
+@Service
+public class BiddingService implements AuctionService {
     private static final Map<String, AuctionEventStreams> biddingAuctionMap = new HashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
     private AuctionRepository auctionRepository;
+
     @Override
-    public String enrollAuction(Long productId) {
+    public String enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
+        Long productId = auctionEnrollRequest.getProductId();
         if(auctionRepository.findByProductId(productId).size() > 0){
             return "Already ENROLL";
         }
@@ -60,7 +69,21 @@ public class BiddingEventService implements AuctionEventService {
     }
 
     @Override
-    public String auctionEvent(String auctionId, AuctionEventType auctionEventType) {
+    public AuctionListResponse getAllAuctions() throws JsonProcessingException {
+        return null;
+    }
+
+    @Override
+    public AuctionEventsResponse getAuctionEvents(String auctionId, AuctionType auctionType) {
+        AuctionEventStreams auctionEventStreams;
+        synchronized (biddingAuctionMap) {
+            auctionEventStreams = biddingAuctionMap.get(auctionId);
+        }
+        return AuctionEventsResponse.builder().auctionEventStreams(auctionEventStreams).build();
+    }
+
+    @Override
+    public String eventAuction(String auctionId, String auctionType, String payload) throws IOException {
         AuctionEventStreams auctionEventStreams;
         synchronized (biddingAuctionMap) {
             auctionEventStreams = biddingAuctionMap.get(auctionId);
@@ -77,14 +100,4 @@ public class BiddingEventService implements AuctionEventService {
                 .build());
         return serverVersion.toString();
     }
-
-    @Override
-    public AuctionEventsResponse getAuctionEvents(String auctionId) {
-        AuctionEventStreams auctionEventStreams;
-        synchronized (biddingAuctionMap) {
-            auctionEventStreams = biddingAuctionMap.get(auctionId);
-        }
-        return AuctionEventsResponse.builder().auctionEventStreams(auctionEventStreams).build();
-    }
-
 }
