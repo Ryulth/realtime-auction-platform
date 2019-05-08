@@ -25,23 +25,23 @@ public class AuctionServiceProxy implements AuctionService {
     BiddingService biddingService;
     @Autowired
     private AuctionRepository auctionRepository;
-    private static final Map<String,AuctionType> auctionTypeMap= new ConcurrentHashMap<>();
-    private static final Map<String ,Boolean> syncAuctions = new ConcurrentHashMap<>();
-    private void checkSyncMap(String auctionId) {
+    private static final Map<Long,AuctionType> auctionTypeMap= new ConcurrentHashMap<>();
+    private static final Map<Long ,Boolean> syncAuctions = new ConcurrentHashMap<>();
+    private void checkSyncMap(Long auctionId) {
         if (syncAuctions.get(auctionId) == null) {
             syncAuctions.putIfAbsent(auctionId, true);
         }
     }
     @Override
-    public String enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
+    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
         switch (auctionEnrollRequest.getAuctionTypeEnum()) {
             case BIDDING:
                 auctionTypeMap.put(biddingService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
-                return "ENROLL";
+                return 1L;
             case COMPETE:
             case ERROR:
             default:
-                return "NOT YET ENROLL";
+                return -1L;
         }
     }
 
@@ -52,7 +52,7 @@ public class AuctionServiceProxy implements AuctionService {
     }
 
     @Override
-    public AuctionDataResponse getAuction(String auctionId) {
+    public AuctionDataResponse getAuction(Long auctionId) {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
@@ -65,7 +65,7 @@ public class AuctionServiceProxy implements AuctionService {
     }
 
     @Override
-    public AuctionEventsResponse getAuctionEvents(String auctionId) {
+    public AuctionEventsResponse getAuctionEvents(Long auctionId) {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
@@ -78,7 +78,7 @@ public class AuctionServiceProxy implements AuctionService {
     }
 
     @Override
-    public AuctionEventsResponse eventAuction(String auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
+    public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:

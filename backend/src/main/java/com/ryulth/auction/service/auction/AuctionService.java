@@ -14,14 +14,14 @@ import java.io.IOException;
 
 @Service
 public interface AuctionService {
-    String enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException;
+    Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException;
 
     AuctionListResponse getAllAuctions() throws JsonProcessingException;
 
-    AuctionDataResponse getAuction(String auctionId);
+    AuctionDataResponse getAuction(Long auctionId);
 
-    AuctionEventsResponse getAuctionEvents(String auctionId);
+    AuctionEventsResponse getAuctionEvents(Long auctionId);
 
-    AuctionEventsResponse eventAuction(String auctionId, AuctionEventRequest auctionEventRequest) throws IOException;
+    AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException;
 
 }

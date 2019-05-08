@@ -38,7 +38,7 @@ public class AuctionController {
     }
 
     @PostMapping("/auction")
-    public String enrollAuction(
+    public Long enrollAuction(
             @RequestBody String payload) throws IOException {
         AuctionEnrollRequest auctionEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEnrollRequest.class);
@@ -48,14 +48,14 @@ public class AuctionController {
 
     @GetMapping("/auctions/{auctionId}")
     public ResponseEntity<AuctionDataResponse> getAuction(
-            @PathVariable("auctionId") String auctionId) {
+            @PathVariable("auctionId") Long auctionId) {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         return new ResponseEntity<>(auctionService.getAuction(auctionId), httpHeaders, HttpStatus.OK);
     }
 
     @GetMapping("/auctions/{auctionId}/events")
     public ResponseEntity<AuctionEventsResponse> getAuctionEvents(
-            @PathVariable("auctionId") String auctionId) {
+            @PathVariable("auctionId") Long auctionId) {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId), httpHeaders, HttpStatus.OK);
     }
@@ -63,7 +63,7 @@ public class AuctionController {
     @PostMapping("/auctions/{auctionId}/event")
     public ResponseEntity<AuctionEventsResponse> eventAuction(
             @RequestBody String payload,
-            @PathVariable("auctionId") String auctionId) throws IOException {
+            @PathVariable("auctionId") Long auctionId) throws IOException {
         AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEventRequest.class);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);

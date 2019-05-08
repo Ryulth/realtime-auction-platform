@@ -22,9 +22,6 @@ public class Auction {
     private Long id;
 
     @Column
-    private String auctionId;
-
-    @Column
     private Long productId;
 
     @Column

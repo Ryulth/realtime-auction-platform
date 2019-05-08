@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEventData {
-    private String id;
+    private Long auctionId;
     private AuctionType auctionType;
     private Product product;
     ArrayDeque<AuctionEvent> auctionEvents;

@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class BiddingService implements AuctionService {
-    private static final Map<String, AuctionEventData> biddingAuctionMap = new ConcurrentHashMap<>();
+    private static final Map<Long, AuctionEventData> biddingAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
     private ProductRepository productRepository;
@@ -33,13 +33,24 @@ public class BiddingService implements AuctionService {
     private AuctionRepository auctionRepository;
 
     @Override
-    public String enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
+    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
+        //String auctionId = UUID.randomUUID().toString().replace("-", "");
         Long productId = auctionEnrollRequest.getProductId();
         if (auctionRepository.findByProductId(productId).size() > 0) {
-            return "Already ENROLL";
+            return -1L;
         }
         Product product = productRepository.getOne(productId);
-        String auctionId = UUID.randomUUID().toString().replace("-", "");
+        Auction auction = Auction.builder()
+                .productId(productId)
+                .auctionType(AuctionType.BIDDING.getValue())
+                .startTime(product.getStartTime())
+                .endTime(product.getEndTime())
+                .price(product.getLowerLimit())
+                .version(0L)
+                .build();
+        auctionRepository.save(auction);
+
+        Long auctionId = auction.getId();
         ArrayDeque<AuctionEvent> auctionEvents = new ArrayDeque<>();
         auctionEvents.add(AuctionEvent.builder()
                 .auctionEventType(AuctionEventType.ENROLL)
@@ -47,7 +58,7 @@ public class BiddingService implements AuctionService {
                 .price(product.getLowerLimit())
                 .build());
         AuctionEventData auctionEventStreams = AuctionEventData.builder()
-                .id(auctionId)
+                .auctionId(auctionId)
                 .auctionType(AuctionType.BIDDING)
                 .startTime(product.getStartTime())
                 .endTime(product.getEndTime())
@@ -57,16 +68,6 @@ public class BiddingService implements AuctionService {
         synchronized (biddingAuctionMap) {
             biddingAuctionMap.put(auctionId, auctionEventStreams);
         }
-        Auction auction = Auction.builder()
-                .auctionId(auctionId)
-                .productId(productId)
-                .auctionType(AuctionType.BIDDING.getValue())
-                .startTime(product.getStartTime())
-                .endTime(product.getEndTime())
-                .price(product.getLowerLimit())
-                .version(0L)
-                .build();
-        auctionRepository.save(auction);
         return auctionId;
     }
 
@@ -76,7 +77,7 @@ public class BiddingService implements AuctionService {
     }
 
     @Override
-    public AuctionDataResponse getAuction(String auctionId) {
+    public AuctionDataResponse getAuction(Long auctionId) {
         AuctionEventData auctionEventData;
         synchronized (biddingAuctionMap) {
             auctionEventData = biddingAuctionMap.get(auctionId);
@@ -87,7 +88,7 @@ public class BiddingService implements AuctionService {
     }
 
     @Override
-    public AuctionEventsResponse getAuctionEvents(String auctionId) {
+    public AuctionEventsResponse getAuctionEvents(Long auctionId) {
         ArrayDeque<AuctionEvent> auctionEvents;
         synchronized (biddingAuctionMap) {
             auctionEvents = biddingAuctionMap.get(auctionId).getAuctionEvents();
@@ -99,7 +100,7 @@ public class BiddingService implements AuctionService {
     }
 
     @Override
-    public AuctionEventsResponse eventAuction(String auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
+    public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
         AuctionEventData auctionEventStreams;
         synchronized (biddingAuctionMap) {
             auctionEventStreams = biddingAuctionMap.get(auctionId);
