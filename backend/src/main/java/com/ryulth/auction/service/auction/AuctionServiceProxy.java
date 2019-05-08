@@ -5,6 +5,7 @@ import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
+import com.ryulth.auction.pojo.response.AuctionDataResponse;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Qualifier("auctionServiceProxy")
@@ -22,11 +25,19 @@ public class AuctionServiceProxy implements AuctionService {
     BiddingService biddingService;
     @Autowired
     private AuctionRepository auctionRepository;
+    private static final Map<String,AuctionType> auctionTypeMap= new ConcurrentHashMap<>();
+    private static final Map<String ,Boolean> syncAuctions = new ConcurrentHashMap<>();
+    private void checkSyncMap(String auctionId) {
+        if (syncAuctions.get(auctionId) == null) {
+            syncAuctions.putIfAbsent(auctionId, true);
+        }
+    }
     @Override
     public String enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
         switch (auctionEnrollRequest.getAuctionTypeEnum()) {
             case BIDDING:
-                return biddingService.enrollAuction(auctionEnrollRequest);
+                auctionTypeMap.put(biddingService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+                return "ENROLL";
             case COMPETE:
             case ERROR:
             default:
@@ -35,16 +46,17 @@ public class AuctionServiceProxy implements AuctionService {
     }
 
     @Override
-    public AuctionListResponse getAllAuctions() throws JsonProcessingException {
+    public AuctionListResponse getAllAuctions() {
         List<Auction> auctions = auctionRepository.findAll();
         return AuctionListResponse.builder().auctions(auctions).build();
     }
 
     @Override
-    public AuctionEventsResponse getAuctionEvents(String auctionId, AuctionType auctionType) {
+    public AuctionDataResponse getAuction(String auctionId) {
+        AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
-                return biddingService.getAuctionEvents(auctionId,auctionType);
+                return biddingService.getAuction(auctionId);
             case COMPETE:
             case ERROR:
             default:
@@ -53,10 +65,24 @@ public class AuctionServiceProxy implements AuctionService {
     }
 
     @Override
-    public String eventAuction(String auctionId, AuctionType auctionType, AuctionEventRequest auctionEventRequest) throws IOException {
+    public AuctionEventsResponse getAuctionEvents(String auctionId) {
+        AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
-                return biddingService.eventAuction(auctionId,auctionType,auctionEventRequest);
+                return biddingService.getAuctionEvents(auctionId);
+            case COMPETE:
+            case ERROR:
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public AuctionEventsResponse eventAuction(String auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
+        AuctionType auctionType = auctionTypeMap.get(auctionId);
+        switch (auctionType) {
+            case BIDDING:
+                return biddingService.eventAuction(auctionId,auctionEventRequest);
             case COMPETE:
             case ERROR:
             default:

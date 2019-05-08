@@ -36,13 +36,11 @@ public class RedisConfig {
     @Bean(name="redisTemplate")
     public RedisTemplate redisTemplateConfig(JedisConnectionFactory jedisConnectionFactory) {
         RedisTemplate redisTemplate = new RedisTemplate();
-
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         redisTemplate.setConnectionFactory(jedisConnectionFactory);
         redisTemplate.setEnableDefaultSerializer(false);
         redisTemplate.setEnableTransactionSupport(true);
-
         return redisTemplate;
     }
 }

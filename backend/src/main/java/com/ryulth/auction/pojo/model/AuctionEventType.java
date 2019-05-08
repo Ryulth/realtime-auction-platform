@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum AuctionEventType {
     ENROLL("enroll"),
-    START("start"),
+    START("start"), //등록후 바로 시작하지 않는 상황이 존재 하기 떄문에 생성
     CLOSE("close"),
     BID("bid"), // 입찰
     OUTBID("outbid"), // 즉시 구매

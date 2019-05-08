@@ -3,9 +3,9 @@ package com.ryulth.auction.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
+import com.ryulth.auction.pojo.response.AuctionDataResponse;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.service.auction.AuctionService;
@@ -37,14 +37,6 @@ public class AuctionController {
         return new ResponseEntity<>(auctionService.getAllAuctions(), httpHeaders, HttpStatus.OK);
     }
 
-    @GetMapping("/auctions/{auctionType}/{auctionId}/events")
-    public ResponseEntity<AuctionEventsResponse> getAuctionEvents(
-            @PathVariable("auctionType") String auctionType,
-            @PathVariable("auctionId") String auctionId) throws JsonProcessingException {
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId, AuctionType.fromText(auctionType)), httpHeaders, HttpStatus.OK);
-    }
-
     @PostMapping("/auction")
     public String enrollAuction(
             @RequestBody String payload) throws IOException {
@@ -54,14 +46,28 @@ public class AuctionController {
         return auctionService.enrollAuction(auctionEnrollRequest);
     }
 
-    @PostMapping("/auctions/{auctionType}/{auctionId}/event")
-    public String eventAuction(
+    @GetMapping("/auctions/{auctionId}")
+    public ResponseEntity<AuctionDataResponse> getAuction(
+            @PathVariable("auctionId") String auctionId) {
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        return new ResponseEntity<>(auctionService.getAuction(auctionId), httpHeaders, HttpStatus.OK);
+    }
+
+    @GetMapping("/auctions/{auctionId}/events")
+    public ResponseEntity<AuctionEventsResponse> getAuctionEvents(
+            @PathVariable("auctionId") String auctionId) {
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId), httpHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping("/auctions/{auctionId}/event")
+    public ResponseEntity<AuctionEventsResponse> eventAuction(
             @RequestBody String payload,
-            @PathVariable("auctionType") String auctionType,
             @PathVariable("auctionId") String auctionId) throws IOException {
         AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEventRequest.class);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return auctionService.eventAuction(auctionId, AuctionType.fromText(auctionType),auctionEventRequest);
+        return new ResponseEntity<>(auctionService.eventAuction(auctionId, auctionEventRequest), httpHeaders, HttpStatus.OK);
+
     }
 }

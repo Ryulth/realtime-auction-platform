@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class AuctionEventRequest {
     private String auctionEventType;
     private Long price;
+    private Long version;
     @JsonIgnore
     public AuctionEventType getAuctionEventTypeEnum(){
         return AuctionEventType.fromText(this.auctionEventType);
