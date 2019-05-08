@@ -1,6 +1,5 @@
 package com.ryulth.auction.service.auction;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.pojo.model.AuctionEvent;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -33,8 +31,7 @@ public class BiddingService implements AuctionService {
     private AuctionRepository auctionRepository;
 
     @Override
-    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
-        //String auctionId = UUID.randomUUID().toString().replace("-", "");
+    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
         Long productId = auctionEnrollRequest.getProductId();
         if (auctionRepository.findByProductId(productId).size() > 0) {
             return -1L;

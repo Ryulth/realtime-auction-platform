@@ -32,16 +32,16 @@ dependencies {
     /* needs compile */
     compile("org.springframework.boot:spring-boot-devtools") // 개발용 서버 버젼에 필요한 도구들
     compile('org.springframework.boot:spring-boot-starter-web') // RestController
-    compile('org.springframework.boot:spring-boot-starter-data-jpa') // JPA
-    runtime('com.h2database:h2')
-    annotationProcessor "org.projectlombok:lombok:1.16.16" // 이전 gradle 버젼은 설정해줘야 한다.
-    compile group: 'org.projectlombok', name: 'lombok', version: '1.16.20' // 롬복
-    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql
-    compile group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
-//    compile group: 'org.apache.commons', name: 'commons-pool2', version: '2.4.3'
-    compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.6' //jackson
+
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.16.20' // 롬복
+    annotationProcessor "org.projectlombok:lombok:1.16.16" // 이전 gradle 버젼은 설정해줘야 한다.
+
+    compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql
+    compile('org.springframework.boot:spring-boot-starter-data-jpa') // JPA
+
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.1.4.RELEASE' // redis
     compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
 
+    compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
 }
