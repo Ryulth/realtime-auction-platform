@@ -19,7 +19,7 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping("/product")
-    public String postProduct(@RequestBody String payload) throws IOException {
+    public String enrollProduct(@RequestBody String payload) throws IOException {
         return productService.enrollProduct(payload);
     }
 

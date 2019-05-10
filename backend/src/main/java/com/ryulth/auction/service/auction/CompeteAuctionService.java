@@ -18,12 +18,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class BiddingService implements AuctionService {
-    private static final Map<Long, AuctionEventData> biddingAuctionMap = new ConcurrentHashMap<>();
+public class CompeteAuctionService implements AuctionService {
+    private static final Map<Long, AuctionEventData> competeAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
     ProductRepository productRepository;
@@ -32,23 +33,24 @@ public class BiddingService implements AuctionService {
 
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
-        Long productId = auctionEnrollRequest.getProductId();
-        if (auctionRepository.findByProductId(productId).size() > 0) {
-            return -1L;
-        }
+        long productId = auctionEnrollRequest.getProductId();
+
         Product product = productRepository.getOne(productId);
-        Auction auction = Auction.builder()
-                .productId(productId)
-                .auctionType(AuctionType.BIDDING.getValue())
-                .startTime(product.getStartTime())
-                .endTime(product.getEndTime())
-                .price(product.getLowerLimit())
-                .version(0L)
-                .build();
+        product.setOnAuction(1);
+        productRepository.save(product);
+        Auction auction = auctionRepository.findByProductId(productId)
+                .orElse(Auction.builder()
+                        .productId(productId)
+                        .auctionType(AuctionType.COMPETE.getValue())
+                        .startTime(product.getStartTime())
+                        .endTime(product.getEndTime())
+                        .price(product.getLowerLimit())
+                        .version(0L)
+                        .build());
         auctionRepository.save(auction);
 
         long auctionId = auction.getId();
-        ArrayDeque<AuctionEvent> auctionEvents = new ArrayDeque<>();
+        Deque<AuctionEvent> auctionEvents = new ArrayDeque<>();
         auctionEvents.add(AuctionEvent.builder()
                 .auctionEventType(AuctionEventType.ENROLL)
                 .version(0L)
@@ -56,15 +58,13 @@ public class BiddingService implements AuctionService {
                 .build());
         AuctionEventData auctionEventStreams = AuctionEventData.builder()
                 .auctionId(auctionId)
-                .auctionType(AuctionType.BIDDING)
+                .auctionType(AuctionType.COMPETE)
                 .startTime(product.getStartTime())
                 .endTime(product.getEndTime())
                 .product(product)
                 .auctionEvents(auctionEvents)
                 .build();
-        synchronized (biddingAuctionMap) {
-            biddingAuctionMap.put(auctionId, auctionEventStreams);
-        }
+        competeAuctionMap.put(auctionId, auctionEventStreams);
         return auctionId;
     }
 
@@ -75,10 +75,7 @@ public class BiddingService implements AuctionService {
 
     @Override
     public AuctionDataResponse getAuction(Long auctionId) {
-        AuctionEventData auctionEventData;
-        synchronized (biddingAuctionMap) {
-            auctionEventData = biddingAuctionMap.get(auctionId);
-        }
+        AuctionEventData auctionEventData = competeAuctionMap.get(auctionId);
         return AuctionDataResponse.builder()
                 .auctionEventData(auctionEventData)
                 .build();
@@ -86,10 +83,7 @@ public class BiddingService implements AuctionService {
 
     @Override
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
-        ArrayDeque<AuctionEvent> auctionEvents;
-        synchronized (biddingAuctionMap) {
-            auctionEvents = biddingAuctionMap.get(auctionId).getAuctionEvents();
-        }
+        Deque<AuctionEvent> auctionEvents = competeAuctionMap.get(auctionId).getAuctionEvents();
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
                 .serverVersion(auctionEvents.getLast().getVersion())
@@ -98,49 +92,48 @@ public class BiddingService implements AuctionService {
 
     @Override
     public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
-        AuctionEventData auctionEventStreams;
-        synchronized (biddingAuctionMap) {
-            auctionEventStreams = biddingAuctionMap.get(auctionId);
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        AuctionEventData auctionEventStreams = competeAuctionMap.get(auctionId);
         if (auctionEventStreams == null) {
             return null;
         }
-        ArrayDeque<AuctionEvent> auctionEvents = auctionEventStreams.getAuctionEvents();
-        long serverVersion = auctionEvents.getLast().getVersion();
-        long clientVersion = auctionEventRequest.getVersion();
-        if (serverVersion == clientVersion) {
-            auctionEvents.add(AuctionEvent.builder()
-                    .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
-                    .version(serverVersion + 1)
-                    .price(auctionEventRequest.getPrice())
-                    .build());
-            ArrayDeque<AuctionEvent> tempEvents = auctionEvents.clone();
-            tempEvents.removeIf(e -> (e.getVersion() <= clientVersion));
-            return AuctionEventsResponse.builder()
-                    .auctionEvents(tempEvents)
-                    .serverVersion(tempEvents.getLast().getVersion())
-                    .build();
+        Deque<AuctionEvent> auctionEvents = auctionEventStreams.getAuctionEvents();
+        synchronized (auctionEvents) {
+            long serverVersion = auctionEvents.getLast().getVersion();
+            long clientVersion = auctionEventRequest.getVersion();
+            if (serverVersion == clientVersion) {
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                auctionEvents.add(AuctionEvent.builder()
+                        .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
+                        .version(serverVersion + 1)
+                        .price(auctionEventRequest.getPrice())
+                        .build());
+                //Deque<AuctionEvent> tempEvents = ((ArrayDeque<AuctionEvent>)auctionEvents).clone();
+                //tempEvents.removeIf(e -> (e.getVersion() <= clientVersion));
+                Deque<AuctionEvent> tempEvents = new ArrayDeque<>();
+                tempEvents.add(auctionEvents.getLast());
+                return AuctionEventsResponse.builder()
+                        .auctionEvents(tempEvents)
+                        .serverVersion(tempEvents.getLast().getVersion())
+                        .build();
+            }
         }
-        if (auctionEvents.getLast().getPrice() < auctionEventRequest.getPrice()) {
-            auctionEvents.add(AuctionEvent.builder()
-                    .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
-                    .version(serverVersion + 1)
-                    .price(auctionEventRequest.getPrice())
-                    .build());
-            ArrayDeque<AuctionEvent> tempEvents = new ArrayDeque<>();
-            tempEvents.add(auctionEvents.clone().getLast());
-            return AuctionEventsResponse.builder()
-                    .auctionEvents(tempEvents)
-                    .serverVersion(tempEvents.getLast().getVersion())
-                    .build();
-        }
+
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
                 .serverVersion(auctionEvents.getLast().getVersion())
                 .build();
     }
 
-    private long getSum(ArrayDeque<AuctionEvent> auctionEvents) {
+    private long getSum(Deque<AuctionEvent> auctionEvents) {
         long sum = 0;
         for (AuctionEvent auctionEvent : auctionEvents) {
             if (auctionEvent.getAuctionEventType() == AuctionEventType.ERROR) {

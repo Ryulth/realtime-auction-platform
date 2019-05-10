@@ -1,6 +1,5 @@
 package com.ryulth.auction.service.auction;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
@@ -22,7 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Qualifier("auctionServiceProxy")
 public class AuctionServiceProxy implements AuctionService {
     @Autowired
-    BiddingService biddingService;
+    BiddingAuctionService biddingAuctionService;
+    @Autowired
+    CompeteAuctionService competeAuctionService;
     @Autowired
     AuctionRepository auctionRepository;
     //TODO Type map to redis cache
@@ -37,9 +38,11 @@ public class AuctionServiceProxy implements AuctionService {
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
         switch (auctionEnrollRequest.getAuctionTypeEnum()) {
             case BIDDING:
-                auctionTypeMap.put(biddingService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+                auctionTypeMap.put(biddingAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
                 return 1L;
             case COMPETE:
+                auctionTypeMap.put(competeAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+                return 2L;
             case ERROR:
             default:
                 return -1L;
@@ -57,8 +60,9 @@ public class AuctionServiceProxy implements AuctionService {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
-                return biddingService.getAuction(auctionId);
+                return biddingAuctionService.getAuction(auctionId);
             case COMPETE:
+                return competeAuctionService.getAuction(auctionId);
             case ERROR:
             default:
                 return null;
@@ -70,8 +74,9 @@ public class AuctionServiceProxy implements AuctionService {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
-                return biddingService.getAuctionEvents(auctionId);
+                return biddingAuctionService.getAuctionEvents(auctionId);
             case COMPETE:
+                return competeAuctionService.getAuctionEvents(auctionId);
             case ERROR:
             default:
                 return null;
@@ -83,8 +88,9 @@ public class AuctionServiceProxy implements AuctionService {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
             case BIDDING:
-                return biddingService.eventAuction(auctionId,auctionEventRequest);
+                return biddingAuctionService.eventAuction(auctionId,auctionEventRequest);
             case COMPETE:
+                return competeAuctionService.eventAuction(auctionId,auctionEventRequest);
             case ERROR:
             default:
                 return null;
