@@ -24,7 +24,8 @@ public class AuctionServiceProxy implements AuctionService {
     @Autowired
     BiddingService biddingService;
     @Autowired
-    private AuctionRepository auctionRepository;
+    AuctionRepository auctionRepository;
+    //TODO Type map to redis cache
     private static final Map<Long,AuctionType> auctionTypeMap= new ConcurrentHashMap<>();
     private static final Map<Long ,Boolean> syncAuctions = new ConcurrentHashMap<>();
     private void checkSyncMap(Long auctionId) {

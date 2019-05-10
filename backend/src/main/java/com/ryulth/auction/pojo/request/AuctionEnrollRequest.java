@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEnrollRequest {
     private String auctionType;
-    private Long productId;
+    private long productId;
     @JsonIgnore
     public AuctionType getAuctionTypeEnum(){
         return AuctionType.fromText(this.auctionType);

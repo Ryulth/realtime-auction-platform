@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEvent {
-    private Long version; // uuid
+    private long version;
     private AuctionEventType auctionEventType;
-    private Long price;
+    private long price;
 }

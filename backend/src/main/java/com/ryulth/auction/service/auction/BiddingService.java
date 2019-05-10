@@ -26,9 +26,9 @@ public class BiddingService implements AuctionService {
     private static final Map<Long, AuctionEventData> biddingAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
-    private ProductRepository productRepository;
+    ProductRepository productRepository;
     @Autowired
-    private AuctionRepository auctionRepository;
+    AuctionRepository auctionRepository;
 
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
@@ -47,7 +47,7 @@ public class BiddingService implements AuctionService {
                 .build();
         auctionRepository.save(auction);
 
-        Long auctionId = auction.getId();
+        long auctionId = auction.getId();
         ArrayDeque<AuctionEvent> auctionEvents = new ArrayDeque<>();
         auctionEvents.add(AuctionEvent.builder()
                 .auctionEventType(AuctionEventType.ENROLL)
@@ -106,16 +106,29 @@ public class BiddingService implements AuctionService {
             return null;
         }
         ArrayDeque<AuctionEvent> auctionEvents = auctionEventStreams.getAuctionEvents();
-        Long serverVersion = auctionEvents.getLast().getVersion();
-        Long clientVersion = auctionEventRequest.getVersion();
-        if (serverVersion.equals(clientVersion)) {
+        long serverVersion = auctionEvents.getLast().getVersion();
+        long clientVersion = auctionEventRequest.getVersion();
+        if (serverVersion == clientVersion) {
             auctionEvents.add(AuctionEvent.builder()
                     .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
                     .version(serverVersion + 1)
-                    .price(auctionEventRequest.getPrice())//auctionEvents.getLast().getPrice()+1000) // TODO 임시로 1000원씩 입찰
+                    .price(auctionEventRequest.getPrice())
                     .build());
             ArrayDeque<AuctionEvent> tempEvents = auctionEvents.clone();
             tempEvents.removeIf(e -> (e.getVersion() <= clientVersion));
+            return AuctionEventsResponse.builder()
+                    .auctionEvents(tempEvents)
+                    .serverVersion(tempEvents.getLast().getVersion())
+                    .build();
+        }
+        if (auctionEvents.getLast().getPrice() < auctionEventRequest.getPrice()) {
+            auctionEvents.add(AuctionEvent.builder()
+                    .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
+                    .version(serverVersion + 1)
+                    .price(auctionEventRequest.getPrice())
+                    .build());
+            ArrayDeque<AuctionEvent> tempEvents = new ArrayDeque<>();
+            tempEvents.add(auctionEvents.clone().getLast());
             return AuctionEventsResponse.builder()
                     .auctionEvents(tempEvents)
                     .serverVersion(tempEvents.getLast().getVersion())
@@ -125,5 +138,19 @@ public class BiddingService implements AuctionService {
                 .auctionEvents(auctionEvents)
                 .serverVersion(auctionEvents.getLast().getVersion())
                 .build();
+    }
+
+    private long getSum(ArrayDeque<AuctionEvent> auctionEvents) {
+        long sum = 0;
+        for (AuctionEvent auctionEvent : auctionEvents) {
+            if (auctionEvent.getAuctionEventType() == AuctionEventType.ERROR) {
+                sum += auctionEvent.getPrice();
+            }
+            if (auctionEvent.getAuctionEventType() == AuctionEventType.BID) {
+                sum += auctionEvent.getPrice();
+            }
+        }
+        System.out.println("CURRENT SUM" + sum);
+        return sum;
     }
 }

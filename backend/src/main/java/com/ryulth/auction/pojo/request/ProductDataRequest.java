@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class ProductDataRequest {
     private String name;
     private String spec;
-    private Long upperLimit;
-    private Long lowerLimit;
+    private long upperLimit;
+    private long lowerLimit;
     private String startTime;
     private String endTime;
 }

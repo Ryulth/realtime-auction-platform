@@ -27,9 +27,9 @@ public class SimpleProductService implements ProductService {
     private static final DateTimeFormatter formatter =DateTimeFormatter.ofPattern(timePattern).withZone(ZoneId.of("Asia/Seoul"));//;
     private static final HttpHeaders httpHeaders = new HttpHeaders();
     @Autowired
-    private ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
     @Autowired
-    private ProductRepository productRepository;
+    ProductRepository productRepository;
     @Override
     public String enrollProduct(String payload) throws IOException {
         ProductDataRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
