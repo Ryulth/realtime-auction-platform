@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class CompeteAuctionService implements AuctionService {
+public class LiveAuctionService implements AuctionService {
     private static final Map<Long, AuctionEventData> competeAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
@@ -41,7 +41,7 @@ public class CompeteAuctionService implements AuctionService {
         Auction auction = auctionRepository.findByProductId(productId)
                 .orElse(Auction.builder()
                         .productId(productId)
-                        .auctionType(AuctionType.COMPETE.getValue())
+                        .auctionType(AuctionType.LIVE.getValue())
                         .startTime(product.getStartTime())
                         .endTime(product.getEndTime())
                         .price(product.getLowerLimit())
@@ -58,7 +58,7 @@ public class CompeteAuctionService implements AuctionService {
                 .build());
         AuctionEventData auctionEventStreams = AuctionEventData.builder()
                 .auctionId(auctionId)
-                .auctionType(AuctionType.COMPETE)
+                .auctionType(AuctionType.LIVE)
                 .startTime(product.getStartTime())
                 .endTime(product.getEndTime())
                 .product(product)
@@ -92,11 +92,6 @@ public class CompeteAuctionService implements AuctionService {
 
     @Override
     public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         AuctionEventData auctionEventStreams = competeAuctionMap.get(auctionId);
         if (auctionEventStreams == null) {
             return null;
@@ -106,11 +101,6 @@ public class CompeteAuctionService implements AuctionService {
             long serverVersion = auctionEvents.getLast().getVersion();
             long clientVersion = auctionEventRequest.getVersion();
             if (serverVersion == clientVersion) {
-                try {
-                    Thread.sleep(4000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 auctionEvents.add(AuctionEvent.builder()
                         .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
                         .version(serverVersion + 1)

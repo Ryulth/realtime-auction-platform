@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-public class BiddingAuctionService implements AuctionService {
+public class BasicAuctionService implements AuctionService {
     private static final Map<Long, AuctionEventData> biddingAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
@@ -43,7 +43,7 @@ public class BiddingAuctionService implements AuctionService {
         Auction auction = auctionRepository.findByProductId(productId)
                 .orElse(Auction.builder()
                         .productId(productId)
-                        .auctionType(AuctionType.BIDDING.getValue())
+                        .auctionType(AuctionType.BASIC.getValue())
                         .startTime(product.getStartTime())
                         .endTime(product.getEndTime())
                         .price(product.getLowerLimit())
@@ -60,7 +60,7 @@ public class BiddingAuctionService implements AuctionService {
                 .build());
         AuctionEventData auctionEventStreams = AuctionEventData.builder()
                 .auctionId(auctionId)
-                .auctionType(AuctionType.BIDDING)
+                .auctionType(AuctionType.BASIC)
                 .startTime(product.getStartTime())
                 .endTime(product.getEndTime())
                 .product(product)

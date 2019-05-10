@@ -21,9 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Qualifier("auctionServiceProxy")
 public class AuctionServiceProxy implements AuctionService {
     @Autowired
-    BiddingAuctionService biddingAuctionService;
+    BasicAuctionService basicAuctionService;
     @Autowired
-    CompeteAuctionService competeAuctionService;
+    LiveAuctionService liveAuctionService;
     @Autowired
     AuctionRepository auctionRepository;
     //TODO Type map to redis cache
@@ -37,11 +37,11 @@ public class AuctionServiceProxy implements AuctionService {
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
         switch (auctionEnrollRequest.getAuctionTypeEnum()) {
-            case BIDDING:
-                auctionTypeMap.put(biddingAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+            case BASIC:
+                auctionTypeMap.put(basicAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
                 return 1L;
-            case COMPETE:
-                auctionTypeMap.put(competeAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+            case LIVE:
+                auctionTypeMap.put(liveAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
                 return 2L;
             case ERROR:
             default:
@@ -59,10 +59,10 @@ public class AuctionServiceProxy implements AuctionService {
     public AuctionDataResponse getAuction(Long auctionId) {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
-            case BIDDING:
-                return biddingAuctionService.getAuction(auctionId);
-            case COMPETE:
-                return competeAuctionService.getAuction(auctionId);
+            case BASIC:
+                return basicAuctionService.getAuction(auctionId);
+            case LIVE:
+                return liveAuctionService.getAuction(auctionId);
             case ERROR:
             default:
                 return null;
@@ -73,10 +73,10 @@ public class AuctionServiceProxy implements AuctionService {
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
-            case BIDDING:
-                return biddingAuctionService.getAuctionEvents(auctionId);
-            case COMPETE:
-                return competeAuctionService.getAuctionEvents(auctionId);
+            case BASIC:
+                return basicAuctionService.getAuctionEvents(auctionId);
+            case LIVE:
+                return liveAuctionService.getAuctionEvents(auctionId);
             case ERROR:
             default:
                 return null;
@@ -87,10 +87,10 @@ public class AuctionServiceProxy implements AuctionService {
     public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
         AuctionType auctionType = auctionTypeMap.get(auctionId);
         switch (auctionType) {
-            case BIDDING:
-                return biddingAuctionService.eventAuction(auctionId,auctionEventRequest);
-            case COMPETE:
-                return competeAuctionService.eventAuction(auctionId,auctionEventRequest);
+            case BASIC:
+                return basicAuctionService.eventAuction(auctionId,auctionEventRequest);
+            case LIVE:
+                return liveAuctionService.eventAuction(auctionId,auctionEventRequest);
             case ERROR:
             default:
                 return null;

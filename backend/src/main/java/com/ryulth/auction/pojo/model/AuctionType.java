@@ -3,8 +3,8 @@ package com.ryulth.auction.pojo.model;
 import java.util.Arrays;
 
 public enum  AuctionType {
-    BIDDING("bidding"), // 비딩 방식
-    COMPETE("compete"), // 경쟁 방식
+    BASIC("basic"), // 비딩 방식
+    LIVE("live"), // 경쟁 방식
     ERROR("error");
 
     private final String value;
