@@ -24,6 +24,8 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url "https://repo.spring.io/libs-milestone" }
+    maven { url "https://repo.spring.io/libs-snapshot" }
 }
 dependencies {
     implementation('org.springframework.boot:spring-boot-starter')
@@ -40,8 +42,8 @@ dependencies {
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql
     compile('org.springframework.boot:spring-boot-starter-data-jpa') // JPA
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '2.1.4.RELEASE' // redis
-    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.2.0.BUILD-SNAPSHOT' // redis
+    compile group: 'io.lettuce', name: 'lettuce-core', version: '5.1.6.RELEASE'
 
     compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
 }
