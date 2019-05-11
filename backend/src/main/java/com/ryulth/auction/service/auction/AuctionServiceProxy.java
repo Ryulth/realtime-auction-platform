@@ -10,6 +10,9 @@ import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -18,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@Qualifier("auctionServiceProxy")
+@Primary
 public class AuctionServiceProxy implements AuctionService {
     @Autowired
     BasicAuctionService basicAuctionService;
@@ -26,22 +29,22 @@ public class AuctionServiceProxy implements AuctionService {
     LiveAuctionService liveAuctionService;
     @Autowired
     AuctionRepository auctionRepository;
-    //TODO Type map to redis cache
-    private static final Map<Long,AuctionType> auctionTypeMap= new ConcurrentHashMap<>();
-    private static final Map<Long ,Boolean> syncAuctions = new ConcurrentHashMap<>();
-    private void checkSyncMap(Long auctionId) {
-        if (syncAuctions.get(auctionId) == null) {
-            syncAuctions.putIfAbsent(auctionId, true);
-        }
-    }
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
+
     @Override
-    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) throws IOException {
+    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
+        ValueOperations vop = redisTemplate.opsForValue();
         switch (auctionEnrollRequest.getAuctionTypeEnum()) {
             case BASIC:
-                auctionTypeMap.put(basicAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+                vop.set(AUCTION_TYPE_REDIS+ basicAuctionService.enrollAuction(auctionEnrollRequest),
+                        auctionEnrollRequest.getAuctionType());
                 return 1L;
             case LIVE:
-                auctionTypeMap.put(liveAuctionService.enrollAuction(auctionEnrollRequest),auctionEnrollRequest.getAuctionTypeEnum());
+                vop.set(AUCTION_TYPE_REDIS+liveAuctionService.enrollAuction(auctionEnrollRequest),
+                        auctionEnrollRequest.getAuctionType());
                 return 2L;
             case ERROR:
             default:
@@ -57,7 +60,8 @@ public class AuctionServiceProxy implements AuctionService {
 
     @Override
     public AuctionDataResponse getAuction(Long auctionId) {
-        AuctionType auctionType = auctionTypeMap.get(auctionId);
+        ValueOperations vop = redisTemplate.opsForValue();
+        AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS+auctionId));
         switch (auctionType) {
             case BASIC:
                 return basicAuctionService.getAuction(auctionId);
@@ -71,7 +75,8 @@ public class AuctionServiceProxy implements AuctionService {
 
     @Override
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
-        AuctionType auctionType = auctionTypeMap.get(auctionId);
+        ValueOperations vop = redisTemplate.opsForValue();
+        AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS+auctionId));
         switch (auctionType) {
             case BASIC:
                 return basicAuctionService.getAuctionEvents(auctionId);
@@ -85,12 +90,13 @@ public class AuctionServiceProxy implements AuctionService {
 
     @Override
     public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
-        AuctionType auctionType = auctionTypeMap.get(auctionId);
+        ValueOperations vop = redisTemplate.opsForValue();
+        AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS+auctionId));
         switch (auctionType) {
             case BASIC:
-                return basicAuctionService.eventAuction(auctionId,auctionEventRequest);
+                return basicAuctionService.eventAuction(auctionId, auctionEventRequest);
             case LIVE:
-                return liveAuctionService.eventAuction(auctionId,auctionEventRequest);
+                return liveAuctionService.eventAuction(auctionId, auctionEventRequest);
             case ERROR:
             default:
                 return null;

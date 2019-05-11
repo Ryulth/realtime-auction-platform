@@ -12,7 +12,6 @@ import com.ryulth.auction.service.auction.AuctionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,7 +24,6 @@ import java.io.IOException;
 public class AuctionController {
     private static Logger logger = LoggerFactory.getLogger(AuctionController.class);
     @Autowired
-    @Qualifier("auctionServiceProxy")
     AuctionService auctionService;
     @Autowired
     ObjectMapper objectMapper;

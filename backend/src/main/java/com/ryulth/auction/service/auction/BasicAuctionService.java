@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -112,12 +111,14 @@ public class BasicAuctionService implements AuctionService {
                 Deque<AuctionEvent> tempEvents = new ArrayDeque<>();
                 tempEvents.add(auctionEvents.getLast());
                 return AuctionEventsResponse.builder()
+                        .auctionType(AuctionType.BASIC.getValue())
                         .auctionEvents(tempEvents)
                         .serverVersion(tempEvents.getLast().getVersion())
                         .build();
             }
         }
         return AuctionEventsResponse.builder()
+                .auctionType(AuctionType.BASIC.getValue())
                 .auctionEvents(auctionEvents)
                 .serverVersion(auctionEvents.getLast().getVersion())
                 .build();

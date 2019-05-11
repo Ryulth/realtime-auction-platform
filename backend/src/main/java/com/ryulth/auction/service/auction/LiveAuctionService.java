@@ -106,11 +106,10 @@ public class LiveAuctionService implements AuctionService {
                         .version(serverVersion + 1)
                         .price(auctionEventRequest.getPrice())
                         .build());
-                //Deque<AuctionEvent> tempEvents = ((ArrayDeque<AuctionEvent>)auctionEvents).clone();
-                //tempEvents.removeIf(e -> (e.getVersion() <= clientVersion));
                 Deque<AuctionEvent> tempEvents = new ArrayDeque<>();
                 tempEvents.add(auctionEvents.getLast());
                 return AuctionEventsResponse.builder()
+                        .auctionType(AuctionType.LIVE.getValue())
                         .auctionEvents(tempEvents)
                         .serverVersion(tempEvents.getLast().getVersion())
                         .build();
@@ -118,6 +117,7 @@ public class LiveAuctionService implements AuctionService {
         }
 
         return AuctionEventsResponse.builder()
+                .auctionType(AuctionType.LIVE.getValue())
                 .auctionEvents(auctionEvents)
                 .serverVersion(auctionEvents.getLast().getVersion())
                 .build();
