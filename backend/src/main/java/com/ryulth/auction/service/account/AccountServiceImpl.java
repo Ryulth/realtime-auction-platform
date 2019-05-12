@@ -16,13 +16,22 @@ public class AccountServiceImpl implements AccountService {
     private static final String ACCOUNT_TOKEN_REDIS = "ryulth:auction:account:";
 
     @Override
-    public String signUp(NaverSignUpRequest naverSignUpRequest) {
+    public String signIn(NaverSignUpRequest naverSignUpRequest) {
         ValueOperations vop = redisTemplate.opsForValue();
-        String token = (String) vop.get(ACCOUNT_TOKEN_REDIS+naverSignUpRequest.getEmail());
-        if(token == null){
-            token = jwtService.create("user", naverSignUpRequest, "user");
-            vop.set(ACCOUNT_TOKEN_REDIS+naverSignUpRequest.getEmail(),token);
-        }
+        String token = jwtService.create("user", naverSignUpRequest, "user");
+        vop.set(ACCOUNT_TOKEN_REDIS + token, naverSignUpRequest.getEmail());
         return token;
     }
+
+    @Override
+    public String checkValidation(String token) {
+        ValueOperations vop = redisTemplate.opsForValue();
+        String email = (String) vop.get(ACCOUNT_TOKEN_REDIS + token);
+        if (email == null) {
+            return null;
+        }
+        return email;
+    }
+
+
 }

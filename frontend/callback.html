@@ -17,7 +17,8 @@
     //alert(naver_id_login.getProfileData('nickname'));
     //alert(naver_id_login.getProfileData('age'));
     alert(naver_id_login.getProfileData('id'));
-    window.localStorage.setItem("testnaver", naver_id_login.oauthParams.access_token)
+
+    window.localStorage.setItem("com.ryulth.auction.account", naver_id_login.oauthParams.access_token)
     //alert(naver_id_login.getProfileData('age'));
     self.close();
   }

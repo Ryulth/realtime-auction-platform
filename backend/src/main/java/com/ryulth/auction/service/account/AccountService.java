@@ -5,5 +5,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AccountService {
-    String signUp(NaverSignUpRequest naverSignUpRequest);
+    String signIn(NaverSignUpRequest naverSignUpRequest);
+    String checkValidation(String token);
 }

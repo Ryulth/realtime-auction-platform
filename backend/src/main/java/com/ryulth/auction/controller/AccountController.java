@@ -5,6 +5,7 @@ import com.ryulth.auction.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -12,8 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController {
     @Autowired
     AccountService accountService;
-    @PostMapping("/signup")
-    public String signUp(@RequestBody NaverSignUpRequest naverSignUpRequest){
-        return accountService.signUp(naverSignUpRequest);
+
+    @PostMapping("/signin")
+    public String signIn(@RequestBody NaverSignUpRequest naverSignUpRequest) {
+        return accountService.signIn(naverSignUpRequest);
+    }
+
+    @PostMapping("/accountTest")
+    public String test(@RequestHeader("Authorization") String token) {
+        return accountService.checkValidation(token);
     }
 }
