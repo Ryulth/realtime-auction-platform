@@ -3,7 +3,6 @@ package com.ryulth.auction.service.auction;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.pojo.model.AuctionEvent;
-import com.ryulth.auction.pojo.model.AuctionEventData;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
@@ -24,8 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,7 +96,7 @@ public class LiveAuctionService implements AuctionService {
                 .collect(Collectors.toList());
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.get(auctionEvents.size()-1).getVersion())
+                .serverVersion(auctionEvents.get(auctionEvents.size() - 1).getVersion())
                 .build();
     }
 
@@ -110,6 +107,7 @@ public class LiveAuctionService implements AuctionService {
                 .read(AuctionEvent.class, StreamOffset.fromStart(AUCTION_EVENTS_REDIS + auctionId));
         AuctionEvent lastAuctionEvent = auctionEvents.get(auctionEvents.size() - 1).getValue();
         if (lastAuctionEvent.getVersion() == auctionEventRequest.getVersion()) {
+            long newPrice = auctionEventRequest.getPrice();
             long newVersion = lastAuctionEvent.getVersion() + 1;
             AuctionEvent newAuctionEvent = AuctionEvent.builder()
                     .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())

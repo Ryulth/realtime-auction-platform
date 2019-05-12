@@ -70,6 +70,12 @@ public class ProductController {
     @GetMapping("/redisTest")
     public void redisTest() {
         long id = 1;
+        StreamOperations sop = redisTemplate.opsForStream();
+
+        List<ObjectRecord<String, String>> records2 = sop
+                .read(String.class, StreamOffset.fromStart("streamTest"));
+        String s2 = records2.get(records2.size()-1).getValue();
+        System.out.println(s2);
         try {
             xAdd(id + "-" + temp,temp);
         } catch (RedisSystemException e) {
@@ -77,20 +83,21 @@ public class ProductController {
             temp+=1;
             redisTest();
         }
-        StreamOperations sop = redisTemplate.opsForStream();
-        List<ObjectRecord<String, AuctionEvent>> records = sop
-                .read(AuctionEvent.class, StreamOffset.fromStart("streamTest"));
+
+        List<ObjectRecord<String, String>> records = sop
+                .read(String.class, StreamOffset.fromStart("streamTest"));
 
         System.out.println(records);
-        AuctionEvent auctionEvent = records.get(records.size()-1).getValue();
-        System.out.println(auctionEvent);
+        String s = records.get(records.size()-1).getValue();
+        System.out.println(s);
     }
     private boolean xAdd(String id,long version) throws RedisSystemException {
         StreamOperations sop = redisTemplate.opsForStream();
-        ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()
+        ObjectRecord<String, String > record = StreamRecords.newRecord()
                 .in("streamTest")
                 .withId(id)
-                .ofObject(AuctionEvent.builder().price(1000).version(version).build());
+                .ofObject("test");
+//                .ofObject(AuctionEvent.builder().price(1000).version(version).build());
         sop.add(record);
         System.out.println("성공");
         return true;

@@ -34,6 +34,7 @@ public class AuctionServiceProxy implements AuctionService {
 
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
 
+
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
         ValueOperations vop = redisTemplate.opsForValue();
