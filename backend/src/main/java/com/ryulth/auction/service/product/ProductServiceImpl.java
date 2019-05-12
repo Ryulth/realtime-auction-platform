@@ -9,6 +9,7 @@ import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +23,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
-public class SimpleProductService implements ProductService {
+@Primary
+public class ProductServiceImpl implements ProductService {
     private static final String timePattern = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter formatter =DateTimeFormatter.ofPattern(timePattern).withZone(ZoneId.of("Asia/Seoul"));//;
     private static final HttpHeaders httpHeaders = new HttpHeaders();

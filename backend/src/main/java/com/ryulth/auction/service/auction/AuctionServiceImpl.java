@@ -3,7 +3,6 @@ package com.ryulth.auction.service.auction;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.pojo.model.AuctionEvent;
-import com.ryulth.auction.pojo.model.AuctionEventData;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
@@ -14,7 +13,6 @@ import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamOffset;
@@ -26,23 +24,19 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
 @Primary
-public class AuctionServiceProxy implements AuctionService {
-    @Autowired
-    BasicAuctionService basicAuctionService;
-    @Autowired
-    LiveAuctionService liveAuctionService;
+public class AuctionServiceImpl implements AuctionService {
     @Autowired
     AuctionRepository auctionRepository;
     @Autowired
     ProductRepository productRepository;
     @Autowired
     RedisTemplate redisTemplate;
+    @Autowired
+    AuctionEventService auctionEventService;
 
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
@@ -100,11 +94,6 @@ public class AuctionServiceProxy implements AuctionService {
     public AuctionDataResponse getAuction(Long auctionId) {
         Auction auction = auctionRepository.findById(auctionId).orElse(null);
         Product product = productRepository.findById(auction.getProductId()).orElse(null);
-        AuctionEventData auctionEventData = AuctionEventData.builder()
-                .auctionEvents(getAuctionEvents(auctionId).getAuctionEvents())
-                .auction(auction)
-                .product(product)
-                .build();
         return AuctionDataResponse.builder()
                 .auctionEvents(getAuctionEvents(auctionId).getAuctionEvents())
                 .auction(auction)
@@ -132,9 +121,9 @@ public class AuctionServiceProxy implements AuctionService {
         AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS+auctionId));
         switch (auctionType) {
             case BASIC:
-                return basicAuctionService.eventAuction(auctionId, auctionEventRequest);
+                return auctionEventService.basicAuctionEvent(auctionId,auctionEventRequest);
             case LIVE:
-                return liveAuctionService.eventAuction(auctionId, auctionEventRequest);
+                return auctionEventService.liveAuctionEvent(auctionId, auctionEventRequest);
             case ERROR:
             default:
                 return null;
