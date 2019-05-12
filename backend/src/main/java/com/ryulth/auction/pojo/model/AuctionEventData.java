@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,7 +23,7 @@ public class AuctionEventData {
     private long auctionId;
     private AuctionType auctionType;
     private Product product;
-    Deque<AuctionEvent> auctionEvents;
+    List<AuctionEvent> auctionEvents;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime startTime;
 

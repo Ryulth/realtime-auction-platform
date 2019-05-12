@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Deque;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
@@ -18,5 +18,5 @@ import java.util.Deque;
 public class AuctionEventsResponse {
     private String auctionType;
     private Long serverVersion;
-    private Deque<AuctionEvent> auctionEvents;
+    private List<AuctionEvent> auctionEvents;
 }

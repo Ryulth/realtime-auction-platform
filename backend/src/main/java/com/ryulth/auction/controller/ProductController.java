@@ -1,16 +1,24 @@
 package com.ryulth.auction.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.service.product.ProductService;
+import io.lettuce.core.RedisCommandExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisSystemException;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.hash.Jackson2HashMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,29 +59,42 @@ public class ProductController {
 
     @DeleteMapping("/products/{productId}")
     public String deleteProduct(
-            @PathVariable("productId") Long productId){
+            @PathVariable("productId") Long productId) {
         return productService.deleteProduct(productId);
     }
 
     @Autowired
     RedisTemplate redisTemplate;
-    private  int temp = 0;
+    private long temp = 0;
+
     @GetMapping("/redisTest")
     public void redisTest() {
-        ValueOperations vop = redisTemplate.opsForValue();
-        ListOperations lop = redisTemplate.opsForList();
-        List a = lop.range("test", 1, 200);
-        System.out.println(a);
-        vop.set("jdkSerial", "jdk");
-        temp += 1;
-        lop.rightPush("test", temp);
-        String result = (String) vop.get("jdkSerial");
-        int result2 = (int) lop.index("test", -1);
-        System.out.println(result);//jdk
-        System.out.println(result2);//jdk
-        System.out.println(lop.size("test"));
+        long id = 1;
+        try {
+            xAdd(id + "-" + temp,temp);
+        } catch (RedisSystemException e) {
+            System.out.println("버전충돌쓰");
+            temp+=1;
+            redisTest();
+        }
         StreamOperations sop = redisTemplate.opsForStream();
-        Map<String, String> body = Collections.singletonMap("time", LocalDateTime.now().toString());
-        sop.add("streamTest",body);
+        List<ObjectRecord<String, AuctionEvent>> records = sop
+                .read(AuctionEvent.class, StreamOffset.fromStart("streamTest"));
+
+        System.out.println(records);
+        AuctionEvent auctionEvent = records.get(records.size()-1).getValue();
+        System.out.println(auctionEvent);
+    }
+    private boolean xAdd(String id,long version) throws RedisSystemException {
+        StreamOperations sop = redisTemplate.opsForStream();
+        ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()
+                .in("streamTest")
+                .withId(id)
+                .ofObject(AuctionEvent.builder().price(1000).version(version).build());
+        sop.add(record);
+        System.out.println("성공");
+        return true;
+
+
     }
 }

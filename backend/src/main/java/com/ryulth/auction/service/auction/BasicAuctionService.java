@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -51,7 +51,7 @@ public class BasicAuctionService implements AuctionService {
         auctionRepository.save(auction);
 
         long auctionId = auction.getId();
-        Deque<AuctionEvent> auctionEvents = new ArrayDeque<>();
+        List<AuctionEvent> auctionEvents = new ArrayList<>();
         auctionEvents.add(AuctionEvent.builder()
                 .auctionEventType(AuctionEventType.ENROLL)
                 .version(0L)
@@ -85,10 +85,10 @@ public class BasicAuctionService implements AuctionService {
 
     @Override
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
-        Deque<AuctionEvent> auctionEvents = biddingAuctionMap.get(auctionId).getAuctionEvents();
+        List<AuctionEvent> auctionEvents = biddingAuctionMap.get(auctionId).getAuctionEvents();
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.getLast().getVersion())
+                .serverVersion(auctionEvents.get(auctionEvents.size()-1).getVersion())
                 .build();
     }
 
@@ -99,28 +99,28 @@ public class BasicAuctionService implements AuctionService {
         if (auctionEventData == null) {
             return null;
         }
-        Deque<AuctionEvent> auctionEvents = auctionEventData.getAuctionEvents();
+        List<AuctionEvent> auctionEvents = auctionEventData.getAuctionEvents();
         synchronized (auctionEvents) {
-            if (auctionEvents.getLast().getPrice() < auctionEventRequest.getPrice()) {
-                long serverVersion = auctionEvents.getLast().getVersion();
+            if (auctionEvents.get(auctionEvents.size()-1).getPrice() < auctionEventRequest.getPrice()) {
+                long serverVersion = auctionEvents.get(auctionEvents.size()-1).getVersion();
                 auctionEvents.add(AuctionEvent.builder()
                         .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
                         .version(serverVersion + 1)
                         .price(auctionEventRequest.getPrice())
                         .build());
-                Deque<AuctionEvent> tempEvents = new ArrayDeque<>();
-                tempEvents.add(auctionEvents.getLast());
+                List<AuctionEvent> tempEvents = new ArrayList<>();
+                tempEvents.add(auctionEvents.get(auctionEvents.size()-1));
                 return AuctionEventsResponse.builder()
                         .auctionType(AuctionType.BASIC.getValue())
                         .auctionEvents(tempEvents)
-                        .serverVersion(tempEvents.getLast().getVersion())
+                        .serverVersion(tempEvents.get(auctionEvents.size()-1).getVersion())
                         .build();
             }
         }
         return AuctionEventsResponse.builder()
                 .auctionType(AuctionType.BASIC.getValue())
                 .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.getLast().getVersion())
+                .serverVersion(auctionEvents.get(auctionEvents.size()-1).getVersion())
                 .build();
     }
 }

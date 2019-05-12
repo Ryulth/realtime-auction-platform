@@ -14,22 +14,32 @@ import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisSystemException;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamRecords;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 public class LiveAuctionService implements AuctionService {
-    private static final Map<Long, AuctionEventData> competeAuctionMap = new ConcurrentHashMap<>();
+    //private static final Map<Long, AuctionEventData> competeAuctionMap = new ConcurrentHashMap<>();
     private final static int SNAPSHOT_CYCLE = 100;
     @Autowired
     ProductRepository productRepository;
     @Autowired
     AuctionRepository auctionRepository;
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
 
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
@@ -50,21 +60,18 @@ public class LiveAuctionService implements AuctionService {
         auctionRepository.save(auction);
 
         long auctionId = auction.getId();
-        Deque<AuctionEvent> auctionEvents = new ArrayDeque<>();
-        auctionEvents.add(AuctionEvent.builder()
+        AuctionEvent auctionEvent = AuctionEvent.builder()
                 .auctionEventType(AuctionEventType.ENROLL)
                 .version(0L)
                 .price(product.getLowerLimit())
-                .build());
-        AuctionEventData auctionEventStreams = AuctionEventData.builder()
-                .auctionId(auctionId)
-                .auctionType(AuctionType.LIVE)
-                .startTime(product.getStartTime())
-                .endTime(product.getEndTime())
-                .product(product)
-                .auctionEvents(auctionEvents)
                 .build();
-        competeAuctionMap.put(auctionId, auctionEventStreams);
+        StreamOperations sop = redisTemplate.opsForStream();
+        ObjectRecord<String, AuctionEvent> auctionRecord = StreamRecords.newRecord()
+                .in(AUCTION_EVENTS_REDIS + auctionId)
+                .withId(auctionId + "-0")
+                .ofObject(auctionEvent);
+        sop.add(auctionRecord);
+
         return auctionId;
     }
 
@@ -75,65 +82,72 @@ public class LiveAuctionService implements AuctionService {
 
     @Override
     public AuctionDataResponse getAuction(Long auctionId) {
-        AuctionEventData auctionEventData = competeAuctionMap.get(auctionId);
-        return AuctionDataResponse.builder()
-                .auctionEventData(auctionEventData)
-                .build();
+//        AuctionEventData auctionEventData = competeAuctionMap.get(auctionId);
+//        return AuctionDataResponse.builder()
+//                .auctionEventData(auctionEventData)
+//                .build();
+        return null;
     }
 
     @Override
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
-        Deque<AuctionEvent> auctionEvents = competeAuctionMap.get(auctionId).getAuctionEvents();
+        StreamOperations sop = redisTemplate.opsForStream();
+        List<ObjectRecord<String, AuctionEvent>> objectRecords = sop
+                .read(AuctionEvent.class, StreamOffset.fromStart(AUCTION_EVENTS_REDIS + auctionId));
+        List<AuctionEvent> auctionEvents = objectRecords.stream()
+                .map(o -> o.getValue())
+                .collect(Collectors.toList());
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.getLast().getVersion())
+                .serverVersion(auctionEvents.get(auctionEvents.size()-1).getVersion())
                 .build();
     }
 
     @Override
-    public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
-        AuctionEventData auctionEventStreams = competeAuctionMap.get(auctionId);
-        if (auctionEventStreams == null) {
-            return null;
-        }
-        Deque<AuctionEvent> auctionEvents = auctionEventStreams.getAuctionEvents();
-        synchronized (auctionEvents) {
-            long serverVersion = auctionEvents.getLast().getVersion();
-            long clientVersion = auctionEventRequest.getVersion();
-            if (serverVersion == clientVersion) {
-                auctionEvents.add(AuctionEvent.builder()
-                        .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
-                        .version(serverVersion + 1)
-                        .price(auctionEventRequest.getPrice())
-                        .build());
-                Deque<AuctionEvent> tempEvents = new ArrayDeque<>();
-                tempEvents.add(auctionEvents.getLast());
-                return AuctionEventsResponse.builder()
-                        .auctionType(AuctionType.LIVE.getValue())
-                        .auctionEvents(tempEvents)
-                        .serverVersion(tempEvents.getLast().getVersion())
-                        .build();
+    public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) {
+        StreamOperations sop = redisTemplate.opsForStream();
+        List<ObjectRecord<String, AuctionEvent>> auctionEvents = sop
+                .read(AuctionEvent.class, StreamOffset.fromStart(AUCTION_EVENTS_REDIS + auctionId));
+        AuctionEvent lastAuctionEvent = auctionEvents.get(auctionEvents.size() - 1).getValue();
+        if (lastAuctionEvent.getVersion() == auctionEventRequest.getVersion()) {
+            long newVersion = lastAuctionEvent.getVersion() + 1;
+            AuctionEvent newAuctionEvent = AuctionEvent.builder()
+                    .auctionEventType(auctionEventRequest.getAuctionEventTypeEnum())
+                    .version(newVersion)
+                    .price(auctionEventRequest.getPrice())
+                    .build();
+            try {
+                xAdd(auctionId, auctionId + "-" + newVersion, newAuctionEvent);
+            } catch (RedisSystemException e) {
+                System.out.println("REDIS 에서 버전충돌쓰");
             }
+            System.out.println("올바른 버젼띠");
+            List<AuctionEvent> tempEvents = new ArrayList<>();
+            tempEvents.add(newAuctionEvent);
+            return AuctionEventsResponse.builder()
+                    .auctionType(AuctionType.LIVE.getValue())
+                    .auctionEvents(tempEvents)
+                    .serverVersion(newVersion)
+                    .build();
         }
 
+        List<AuctionEvent> tempEvents = auctionEvents.stream()
+                .map(o -> o.getValue())
+                .collect(Collectors.toList());
+        System.out.println("버전충돌");
         return AuctionEventsResponse.builder()
                 .auctionType(AuctionType.LIVE.getValue())
-                .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.getLast().getVersion())
+                .auctionEvents(tempEvents)
+                .serverVersion(lastAuctionEvent.getVersion())
                 .build();
     }
 
-    private long getSum(Deque<AuctionEvent> auctionEvents) {
-        long sum = 0;
-        for (AuctionEvent auctionEvent : auctionEvents) {
-            if (auctionEvent.getAuctionEventType() == AuctionEventType.ERROR) {
-                sum += auctionEvent.getPrice();
-            }
-            if (auctionEvent.getAuctionEventType() == AuctionEventType.BID) {
-                sum += auctionEvent.getPrice();
-            }
-        }
-        System.out.println("CURRENT SUM" + sum);
-        return sum;
+    private void xAdd(long auctionId, String versionId, AuctionEvent auctionEvent) throws RedisSystemException {
+        StreamOperations sop = redisTemplate.opsForStream();
+        ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()
+                .in(AUCTION_EVENTS_REDIS + auctionId)
+                .withId(versionId)
+                .ofObject(auctionEvent);
+        sop.add(record);
     }
 }
