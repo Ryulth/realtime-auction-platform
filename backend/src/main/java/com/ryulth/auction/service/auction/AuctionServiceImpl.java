@@ -14,6 +14,7 @@ import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamRecords;
@@ -72,12 +73,11 @@ public class AuctionServiceImpl implements AuctionService {
                 .price(product.getLowerLimit())
                 .build();
 
-        StreamOperations sop = redisTemplate.opsForStream();
-        ObjectRecord<String, AuctionEvent> auctionRecord = StreamRecords.newRecord()
-                .in(AUCTION_EVENTS_REDIS + auctionId)
-                .withId(auctionId + "-0")
-                .ofObject(auctionEvent);
-        sop.add(auctionRecord);
+        try {
+            xAdd(auctionId, auctionId + "-0", auctionEvent);
+        } catch (RedisSystemException e) {
+            System.out.println("이미 등록쓰");
+        }
 
         vop.set(AUCTION_TYPE_REDIS+auctionId,auctionType.getValue());
 
@@ -128,5 +128,13 @@ public class AuctionServiceImpl implements AuctionService {
             default:
                 return null;
         }
+    }
+    private void xAdd(long auctionId, String versionId, AuctionEvent auctionEvent) throws RedisSystemException {
+        StreamOperations sop = redisTemplate.opsForStream();
+        ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()
+                .in(AUCTION_EVENTS_REDIS + auctionId)
+                .withId(versionId)
+                .ofObject(auctionEvent);
+        sop.add(record);
     }
 }
