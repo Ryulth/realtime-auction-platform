@@ -42,7 +42,12 @@ dependencies {
     compile group: 'mysql', name: 'mysql-connector-java', version: '8.0.13' // mysql
     compile('org.springframework.boot:spring-boot-starter-data-jpa') // JPA
 
-    compile group: 'org.springframework.data', name: 'spring-data-redis', version: '2.2.0.BUILD-SNAPSHOT' // redis
+    compile group: 'org.springframework.data.build', name: 'spring-data-parent', version: '2.2.0.BUILD-SNAPSHOT', ext: 'pom'
+
+    compile "org.springframework.data:spring-data-commons:2.2.0.BUILD-SNAPSHOT"
+    compile "org.springframework.data:spring-data-keyvalue:2.2.0.BUILD-SNAPSHOT"
+    compile "org.springframework.data:spring-data-redis:2.2.0.BUILD-SNAPSHOT"
+
     compile group: 'io.lettuce', name: 'lettuce-core', version: '5.1.6.RELEASE'
 
     compile('org.springframework.boot:spring-boot-starter-websocket') // websocket
