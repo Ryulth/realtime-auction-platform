@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 @Data
 @Builder
 @AllArgsConstructor() // Lombok builder use this
-@Table(name = "products")
+@Table(name = "auction")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Auction {
     protected Auction(){}
