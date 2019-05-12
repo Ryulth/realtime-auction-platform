@@ -40,36 +40,7 @@ public class LiveAuctionService implements AuctionService {
 
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
-        long productId = auctionEnrollRequest.getProductId();
-
-        Product product = productRepository.getOne(productId);
-        product.setOnAuction(1);
-        productRepository.save(product);
-        Auction auction = auctionRepository.findByProductId(productId)
-                .orElse(Auction.builder()
-                        .productId(productId)
-                        .auctionType(AuctionType.LIVE.getValue())
-                        .startTime(product.getStartTime())
-                        .endTime(product.getEndTime())
-                        .price(product.getLowerLimit())
-                        .version(0L)
-                        .build());
-        auctionRepository.save(auction);
-
-        long auctionId = auction.getId();
-        AuctionEvent auctionEvent = AuctionEvent.builder()
-                .auctionEventType(AuctionEventType.ENROLL)
-                .version(0L)
-                .price(product.getLowerLimit())
-                .build();
-        StreamOperations sop = redisTemplate.opsForStream();
-        ObjectRecord<String, AuctionEvent> auctionRecord = StreamRecords.newRecord()
-                .in(AUCTION_EVENTS_REDIS + auctionId)
-                .withId(auctionId + "-0")
-                .ofObject(auctionEvent);
-        sop.add(auctionRecord);
-
-        return auctionId;
+        return null;
     }
 
     @Override
@@ -88,16 +59,7 @@ public class LiveAuctionService implements AuctionService {
 
     @Override
     public AuctionEventsResponse getAuctionEvents(Long auctionId) {
-        StreamOperations sop = redisTemplate.opsForStream();
-        List<ObjectRecord<String, AuctionEvent>> objectRecords = sop
-                .read(AuctionEvent.class, StreamOffset.fromStart(AUCTION_EVENTS_REDIS + auctionId));
-        List<AuctionEvent> auctionEvents = objectRecords.stream()
-                .map(o -> o.getValue())
-                .collect(Collectors.toList());
-        return AuctionEventsResponse.builder()
-                .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.get(auctionEvents.size() - 1).getVersion())
-                .build();
+        return null;
     }
 
     @Override
