@@ -3,10 +3,7 @@ package com.ryulth.auction.controller;
 import com.ryulth.auction.pojo.request.NaverSignUpRequest;
 import com.ryulth.auction.service.account.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -14,8 +11,10 @@ public class AccountController {
     @Autowired
     AccountService accountService;
 
+    @CrossOrigin("*")
     @PostMapping("/signin")
     public String signIn(@RequestBody NaverSignUpRequest naverSignUpRequest) {
+        System.out.println("로그인");
         return accountService.signIn(naverSignUpRequest);
     }
 

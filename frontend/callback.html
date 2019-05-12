@@ -17,11 +17,30 @@
     //alert(naver_id_login.getProfileData('nickname'));
     //alert(naver_id_login.getProfileData('age'));
     alert(naver_id_login.getProfileData('id'));
-
-    window.localStorage.setItem("com.ryulth.auction.account", naver_id_login.oauthParams.access_token)
+    let reqBody = {
+            "email": naver_id_login.getProfileData('email'),
+            "nickName":naver_id_login.getProfileData('nickname'),
+        }
+    let res;
+    $.ajax({
+            async: false, // false 일 경우 동기 요청으로 변경
+            type: "POST",
+            contentType: "application/json",
+            url: `http://127.0.0.1:8080/signin`,
+            data: JSON.stringify(reqBody),
+            dataType: 'json',
+            success: function (response) {
+              alert(response);
+              res=response;
+              window.localStorage.setItem("com.ryulth.auction.account", response);
+              self.close();
+         }
+    });
+    alert(res);
     //alert(naver_id_login.getProfileData('age'));
-    self.close();
+    //self.close();
   }
+  
 </script>
 </body>
 </html>
