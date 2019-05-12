@@ -1,15 +1,22 @@
-# REALTIME AUCTION
+## REALTIME AUCTION
 
-기술 스택
+### 기술 스택 
 
-* backend - java(springboot)
-* frontend - vanilla javascript
-* db - mySQL
+- FRONTEND
+  - Vanilla Javascript
+  - jQuery
+  - bootstrap
+- BACKEND
+  - Java 8 +
+  - Spring Boot V2.0 +
+  - JpaRepository
+  - MySQL 5.7 + 
+  - Redis 5.0 +
+- ETC
+  - GIT
+  - WebSocket
 
-* deploy - docker
-* etc - Websocket , EventSourcing Pattern 
-
-## 시나리오
+### 시나리오
 
 #### [참조링크](<https://namu.wiki/w/eBay#s-5.3>)
 
