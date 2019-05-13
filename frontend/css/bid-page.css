@@ -248,7 +248,9 @@
     font-size: 13px;
     color: #4a4a4a;
 }
-
+.detail-description {
+    height: 190px;
+}
 .bid-history-container {
     width: 100%;
     display: flex;

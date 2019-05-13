@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&amp;subset=korean" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&amp;subset=korean" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <link rel="stylesheet" type="text/css" href="./css/my-page.css">
+</head>
+<body>>
+<div id="header">
+    <div class="header-content">
+        <i class="fas fa-bars menu-icon"></i>
+        <input type="text" class="search_input" placeholder="Search Item">
+        <a href="#" class="user-icon-href"><img src="./images/user.svg" class="user-icon"></a>
+    </div>
+</div>
+
+<div id="content">
+    <div id="my-page-container">
+        <div class="order-state-container">
+            <div class="order-state-text">나의 주문처리 현황</div>
+            <ul class="order-state-list">
+                <li class="order-state-box">
+                    <span class="order-state">입금 전</span>
+                    <span class="order-state-num">0</span>
+                </li>
+                <li class="arrow-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </li>
+                <li class="order-state-box">
+                    <span class="order-state">배송 준비중</span>
+                    <span class="order-state-num">1</span>
+                </li>
+                <li class="arrow-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </li>
+
+                <li class="order-state-box">
+                    <span class="order-state">배송 중</span>
+                    <span class="order-state-num">0</span>
+                </li>
+                <li class="arrow-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </li>
+
+                <li class="order-state-box">
+                    <span class="order-state">배송 완료</span>
+                    <span class="order-state-num">3</span>
+                </li>
+            </ul>
+        </div>
+        <div class="bid-state-container">
+            <div class="bid-state-box-wrapper">
+                <div class="bid-state-box" id="participate-bid">
+                    <span class="icon-wrapper"><i class="fas fa-history"></i></span>
+                    <span class="bid-state-text">참여 경매 목록</span>
+                </div>
+            </div>
+            <div class="bid-state-box-wrapper">
+                <div class="bid-state-box" id="success-bid">
+                    <img src="./images/auction_bid-512.png" alt="">
+                    <span class="bid-state-text">낙찰된 경매 목록</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="footer"></div>
+
+<script src="./js/main.js"></script>
+</body>
+</html>
