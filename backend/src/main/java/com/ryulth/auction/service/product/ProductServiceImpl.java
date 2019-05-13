@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String deleteProduct(Long productId) {
         Product product = productRepository.getOne(productId);
-        product.setFlag(0);
+        product.setOnSale(0);
         productRepository.save(product);
         return "DELETE PRODUCT";
     }

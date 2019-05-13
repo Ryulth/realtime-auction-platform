@@ -49,7 +49,7 @@ public class AuctionEventServiceImpl implements AuctionEventService{
             List<AuctionEvent> tempEvents = new ArrayList<>();
             tempEvents.add(newAuctionEvent);
             return AuctionEventsResponse.builder()
-                    .auctionType(AuctionType.LIVE.getValue())
+                    .auctionType(AuctionType.BASIC.getValue())
                     .auctionEvents(tempEvents)
                     .serverVersion(newVersion)
                     .build();
@@ -59,7 +59,7 @@ public class AuctionEventServiceImpl implements AuctionEventService{
                 .collect(Collectors.toList());
         System.out.println("가격충돌");
         return AuctionEventsResponse.builder()
-                .auctionType(AuctionType.LIVE.getValue())
+                .auctionType(AuctionType.BASIC.getValue())
                 .auctionEvents(tempEvents)
                 .serverVersion(lastAuctionEvent.getVersion())
                 .build();

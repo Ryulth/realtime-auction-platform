@@ -21,9 +21,13 @@ import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,18 +45,19 @@ public class AuctionServiceImpl implements AuctionService {
 
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
+    private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
 
     @Override
     public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest) {
         AuctionType auctionType = auctionEnrollRequest.getAuctionTypeEnum();
-        if(auctionType == AuctionType.ERROR){
+        if (auctionType == AuctionType.ERROR) {
             return -1L;
         }
         ValueOperations vop = redisTemplate.opsForValue();
         long productId = auctionEnrollRequest.getProductId();
 
         Product product = productRepository.getOne(productId);
-        product.setOnAuction(1);
+        product.setOnSale(1);
         productRepository.save(product);
 
         Auction auction = auctionRepository.findByProductId(productId)
@@ -74,12 +79,13 @@ public class AuctionServiceImpl implements AuctionService {
                 .build();
 
         try {
-            xAdd(auctionId, auctionId + "-0", auctionEvent);
+            xAdd(AUCTION_EVENTS_REDIS + auctionId, auctionId + "-0", auctionEvent);
+            vop.set(AUCTION_ONGOING_REDIS + auctionId, true);
         } catch (RedisSystemException e) {
             System.out.println("이미 등록쓰");
         }
 
-        vop.set(AUCTION_TYPE_REDIS+auctionId,auctionType.getValue());
+        vop.set(AUCTION_TYPE_REDIS + auctionId, auctionType.getValue());
 
         return auctionId;
     }
@@ -118,10 +124,10 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException {
         ValueOperations vop = redisTemplate.opsForValue();
-        AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS+auctionId));
+        AuctionType auctionType = AuctionType.fromText((String) vop.get(AUCTION_TYPE_REDIS + auctionId));
         switch (auctionType) {
             case BASIC:
-                return auctionEventService.basicAuctionEvent(auctionId,auctionEventRequest);
+                return auctionEventService.basicAuctionEvent(auctionId, auctionEventRequest);
             case LIVE:
                 return auctionEventService.liveAuctionEvent(auctionId, auctionEventRequest);
             case ERROR:
@@ -129,12 +135,30 @@ public class AuctionServiceImpl implements AuctionService {
                 return null;
         }
     }
-    private void xAdd(long auctionId, String versionId, AuctionEvent auctionEvent) throws RedisSystemException {
+
+    @Override
+    public void endAuction() {
+        scheduledEndAuction();
+    }
+
+    @Scheduled(initialDelay = 5000, fixedDelay = 1000)
+    @Transactional
+    private void scheduledEndAuction() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        List<Auction> auctions = auctionRepository.findByEndTimeLessThanEqualAndOnAuction(now, 1);
+        auctions.stream().forEach(a -> {
+            a.setOnAuction(0);
+            auctionRepository.save(a);
+        });
+        System.out.println(auctions);
+    }
+
+    private <T> void xAdd(String key, String versionId, T data) throws RedisSystemException {
         StreamOperations sop = redisTemplate.opsForStream();
-        ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()
-                .in(AUCTION_EVENTS_REDIS + auctionId)
+        ObjectRecord<String, T> record = StreamRecords.newRecord()
+                .in(key)
                 .withId(versionId)
-                .ofObject(auctionEvent);
+                .ofObject(data);
         sop.add(record);
     }
 }

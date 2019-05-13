@@ -38,11 +38,9 @@ public class Product {
     @Column
     private Long lowerLimit;
 
-    @Column
-    private int flag;
-
     @Column(columnDefinition = "TINYINT(1)")
-    private int onAuction;
+    private int onSale;
+
     @Column
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime createTime;
@@ -57,8 +55,7 @@ public class Product {
 
     @PrePersist
     void setUp(){
-        this.flag = 1 ;
-        this.onAuction = 0;
+        this.onSale = 1 ;
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
         this.createTime = ZonedDateTime.now(seoulZoneId);
     }

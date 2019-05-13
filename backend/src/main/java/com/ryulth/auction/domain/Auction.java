@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -30,12 +31,24 @@ public class Auction {
     @Column
     private Long version;
 
+    @Column(columnDefinition = "TINYINT(1)")
+    private int onAuction;
+
     @Column
     private String auctionType;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private ZonedDateTime createTime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime startTime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private ZonedDateTime endTime;
+    @PrePersist
+    void setUp(){
+        this.onAuction = 1 ;
+        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+        this.createTime = ZonedDateTime.now(seoulZoneId);
+    }
 }

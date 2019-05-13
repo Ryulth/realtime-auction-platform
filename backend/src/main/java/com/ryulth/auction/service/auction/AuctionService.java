@@ -23,4 +23,5 @@ public interface AuctionService {
 
     AuctionEventsResponse eventAuction(Long auctionId, AuctionEventRequest auctionEventRequest) throws IOException;
 
+    void endAuction();
 }
