@@ -29,12 +29,14 @@ public class AuctionController {
     ObjectMapper objectMapper;
     private static final HttpHeaders httpHeaders = new HttpHeaders();
 
+    @CrossOrigin("*")
     @GetMapping("/auctions")
     public ResponseEntity<AuctionListResponse> getAllAuctions() throws JsonProcessingException {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         return new ResponseEntity<>(auctionService.getAllAuctions(), httpHeaders, HttpStatus.OK);
     }
 
+    @CrossOrigin("*")
     @PostMapping("/auction")
     public Long enrollAuction(
             @RequestBody String payload) throws IOException {
@@ -44,6 +46,7 @@ public class AuctionController {
         return auctionService.enrollAuction(auctionEnrollRequest);
     }
 
+    @CrossOrigin("*")
     @GetMapping("/auctions/{auctionId}")
     public ResponseEntity<AuctionDataResponse> getAuction(
             @PathVariable("auctionId") Long auctionId) {
@@ -51,6 +54,7 @@ public class AuctionController {
         return new ResponseEntity<>(auctionService.getAuction(auctionId), httpHeaders, HttpStatus.OK);
     }
 
+    @CrossOrigin("*")
     @GetMapping("/auctions/{auctionId}/events")
     public ResponseEntity<AuctionEventsResponse> getAuctionEvents(
             @PathVariable("auctionId") Long auctionId) {
@@ -58,6 +62,7 @@ public class AuctionController {
         return new ResponseEntity<>(auctionService.getAuctionEvents(auctionId), httpHeaders, HttpStatus.OK);
     }
 
+    @CrossOrigin("*")
     @PostMapping("/auctions/{auctionId}/event")
     public ResponseEntity<AuctionEventsResponse> eventAuction(
             @RequestBody String payload,

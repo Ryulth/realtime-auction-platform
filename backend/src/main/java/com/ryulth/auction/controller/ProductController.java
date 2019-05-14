@@ -1,12 +1,9 @@
 package com.ryulth.auction.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.service.product.ProductService;
-import io.lettuce.core.RedisCommandExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +11,13 @@ import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.connection.stream.ObjectRecord;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StreamOperations;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.hash.Jackson2HashMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class ProductController {
@@ -34,22 +25,26 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
+    @CrossOrigin("*")
     @PostMapping("/product")
     public String enrollProduct(@RequestBody String payload) throws IOException {
         return productService.enrollProduct(payload);
     }
 
+    @CrossOrigin("*")
     @GetMapping("/products")
     public ResponseEntity<ProductListResponse> getAllProducts() throws JsonProcessingException {
         return productService.getAllProducts();
     }
 
+    @CrossOrigin("*")
     @GetMapping("/products/{productId}")
     public ResponseEntity<ProductDetailResponse> getOneProducts(
             @PathVariable("productId") Long productId) throws JsonProcessingException {
         return productService.getOneProducts(productId);
     }
 
+    @CrossOrigin("*")
     @PutMapping("/products/{productId}")
     public String updateProduct(
             @PathVariable("productId") Long productId,
@@ -57,6 +52,7 @@ public class ProductController {
         return productService.updateProduct(productId, payload);
     }
 
+    @CrossOrigin("*")
     @DeleteMapping("/products/{productId}")
     public String deleteProduct(
             @PathVariable("productId") Long productId) {

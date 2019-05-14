@@ -18,6 +18,7 @@ public class AccountController {
         return accountService.signIn(naverSignUpRequest);
     }
 
+    @CrossOrigin("*")
     @PostMapping("/accountTest")
     public String test(@RequestHeader("Authorization") String token) {
         return accountService.checkValidation(token);

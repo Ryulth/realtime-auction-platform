@@ -150,7 +150,7 @@ public class AuctionServiceImpl implements AuctionService {
             a.setOnAuction(0);
             auctionRepository.save(a);
         });
-        System.out.println(auctions);
+        //System.out.println(auctions);
     }
 
     private <T> void xAdd(String key, String versionId, T data) throws RedisSystemException {
