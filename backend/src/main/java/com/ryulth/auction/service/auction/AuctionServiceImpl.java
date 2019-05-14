@@ -12,6 +12,8 @@ import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.RedisSystemException;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 @Component
 @Primary
 public class AuctionServiceImpl implements AuctionService {
+    private static Logger logger = LoggerFactory.getLogger(AuctionServiceImpl.class);
     @Autowired
     AuctionRepository auctionRepository;
     @Autowired
@@ -82,7 +85,7 @@ public class AuctionServiceImpl implements AuctionService {
             xAdd(AUCTION_EVENTS_REDIS + auctionId, auctionId + "-0", auctionEvent);
             vop.set(AUCTION_ONGOING_REDIS + auctionId, true);
         } catch (RedisSystemException e) {
-            System.out.println("이미 등록쓰");
+            logger.info("이미 등록되있음");
         }
 
         vop.set(AUCTION_TYPE_REDIS + auctionId, auctionType.getValue());
@@ -117,7 +120,6 @@ public class AuctionServiceImpl implements AuctionService {
                 .collect(Collectors.toList());
         return AuctionEventsResponse.builder()
                 .auctionEvents(auctionEvents)
-                .serverVersion(auctionEvents.get(auctionEvents.size() - 1).getVersion())
                 .build();
     }
 
@@ -143,7 +145,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Scheduled(initialDelay = 5000, fixedDelay = 1000)
     @Transactional
-    private void scheduledEndAuction() {
+    protected void scheduledEndAuction() {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         List<Auction> auctions = auctionRepository.findByEndTimeLessThanEqualAndOnAuction(now, 1);
         auctions.stream().forEach(a -> {

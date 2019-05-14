@@ -1,8 +1,7 @@
-package com.ryulth.auction.pojo.request;
+package com.ryulth.auction.pojo.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,11 +12,6 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
-public class NaverSignUpRequest {
-    private String naverId;
-    @JsonProperty("access_token")
-    private String accessToken;
-    private String email;
-    private String nickName;
-
+public class AccountSignInResponse {
+    String jwtToken;
 }

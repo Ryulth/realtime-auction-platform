@@ -2,6 +2,7 @@ package com.ryulth.auction.service.account;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -10,7 +11,8 @@ import java.util.Map;
 @Component
 public class JwtServiceImpl implements JwtService{
 
-    private static final String SALT =  "ryulthSecret";
+    private @Value("${jwt.secret}")
+    String SALT;
     @Override
     public <T> String create(String key, T data, String subject){
         String jwt = Jwts.builder()

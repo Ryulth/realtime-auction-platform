@@ -4,6 +4,8 @@ import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.model.AuctionType;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.RedisSystemException;
@@ -21,10 +23,12 @@ import java.util.stream.Collectors;
 @Component
 @Primary
 public class AuctionEventServiceImpl implements AuctionEventService{
+    private static Logger logger = LoggerFactory.getLogger(AuctionEventServiceImpl.class);
     @Autowired
     RedisTemplate redisTemplate;
 
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
+    //TODO 중복 코드 제거
 
     @Override
     public AuctionEventsResponse basicAuctionEvent(long auctionId, AuctionEventRequest auctionEventRequest) {
@@ -42,26 +46,25 @@ public class AuctionEventServiceImpl implements AuctionEventService{
                     .build();
             try {
                 xAdd(auctionId, auctionId + "-" + newPrice, newAuctionEvent);
-            } catch (RedisSystemException e) {
-                System.out.println("REDIS 에서 가격 충돌쓰");
+                List<AuctionEvent> tempEvents = new ArrayList<>();
+                tempEvents.add(newAuctionEvent);
+                logger.info("올바른 입력");
+                return AuctionEventsResponse.builder()
+                        .auctionType(AuctionType.BASIC.getValue())
+                        .auctionEvents(tempEvents)
+                        .build();
+            } catch (RedisSystemException ignore) {
+                logger.info("Redis 버전충돌");
             }
-            System.out.println("올바른 가격띠");
-            List<AuctionEvent> tempEvents = new ArrayList<>();
-            tempEvents.add(newAuctionEvent);
-            return AuctionEventsResponse.builder()
-                    .auctionType(AuctionType.BASIC.getValue())
-                    .auctionEvents(tempEvents)
-                    .serverVersion(newVersion)
-                    .build();
+
         }
+        logger.info("버전충돌");
         List<AuctionEvent> tempEvents = auctionEvents.stream()
                 .map(o -> o.getValue())
                 .collect(Collectors.toList());
-        System.out.println("가격충돌");
         return AuctionEventsResponse.builder()
                 .auctionType(AuctionType.BASIC.getValue())
                 .auctionEvents(tempEvents)
-                .serverVersion(lastAuctionEvent.getVersion())
                 .build();
     }
 
@@ -81,27 +84,24 @@ public class AuctionEventServiceImpl implements AuctionEventService{
                     .build();
             try {
                 xAdd(auctionId, auctionId + "-" + newVersion, newAuctionEvent);
-            } catch (RedisSystemException e) {
-                System.out.println("REDIS 에서 버전충돌쓰");
+                List<AuctionEvent> tempEvents = new ArrayList<>();
+                tempEvents.add(newAuctionEvent);
+                logger.info("올바른 입력");
+                return AuctionEventsResponse.builder()
+                        .auctionType(AuctionType.LIVE.getValue())
+                        .auctionEvents(tempEvents)
+                        .build();
+            } catch (RedisSystemException ignore) {
+                logger.info("Redis 버전충돌");
             }
-            System.out.println("올바른 버젼띠");
-            List<AuctionEvent> tempEvents = new ArrayList<>();
-            tempEvents.add(newAuctionEvent);
-            return AuctionEventsResponse.builder()
-                    .auctionType(AuctionType.LIVE.getValue())
-                    .auctionEvents(tempEvents)
-                    .serverVersion(newVersion)
-                    .build();
         }
-
+        logger.info("버전충돌");
         List<AuctionEvent> tempEvents = auctionEvents.stream()
                 .map(o -> o.getValue())
                 .collect(Collectors.toList());
-        System.out.println("버전충돌");
         return AuctionEventsResponse.builder()
                 .auctionType(AuctionType.LIVE.getValue())
                 .auctionEvents(tempEvents)
-                .serverVersion(lastAuctionEvent.getVersion())
                 .build();
     }
     private void xAdd(long auctionId, String versionId, AuctionEvent auctionEvent) throws RedisSystemException {

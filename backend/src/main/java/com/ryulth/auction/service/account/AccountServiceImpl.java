@@ -1,6 +1,7 @@
 package com.ryulth.auction.service.account;
 
 import com.ryulth.auction.pojo.request.NaverSignUpRequest;
+import com.ryulth.auction.pojo.response.AccountSignInResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -16,11 +17,11 @@ public class AccountServiceImpl implements AccountService {
     private static final String ACCOUNT_TOKEN_REDIS = "ryulth:auction:account:";
 
     @Override
-    public String signIn(NaverSignUpRequest naverSignUpRequest) {
+    public AccountSignInResponse signIn(NaverSignUpRequest naverSignUpRequest) {
         ValueOperations vop = redisTemplate.opsForValue();
-        String token = jwtService.create("user", naverSignUpRequest, "user");
-        vop.set(ACCOUNT_TOKEN_REDIS + token, naverSignUpRequest.getEmail());
-        return token;
+        String token = jwtService.create("user", naverSignUpRequest, "auction");
+        vop.set(ACCOUNT_TOKEN_REDIS + token, naverSignUpRequest.getNaverId());
+        return AccountSignInResponse.builder().jwtToken(token).build();
     }
 
     @Override

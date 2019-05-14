@@ -17,6 +17,5 @@ import java.util.List;
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
 public class AuctionEventsResponse {
     private String auctionType;
-    private Long serverVersion;
     private List<AuctionEvent> auctionEvents;
 }

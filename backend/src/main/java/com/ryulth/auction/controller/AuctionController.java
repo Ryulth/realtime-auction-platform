@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ import java.io.IOException;
 @RestController
 public class AuctionController {
     private static Logger logger = LoggerFactory.getLogger(AuctionController.class);
+    @Autowired
+    SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
     AuctionService auctionService;
     @Autowired
@@ -64,13 +67,15 @@ public class AuctionController {
 
     @CrossOrigin("*")
     @PostMapping("/auctions/{auctionId}/event")
-    public ResponseEntity<AuctionEventsResponse> eventAuction(
+    public void eventAuction(
             @RequestBody String payload,
             @PathVariable("auctionId") Long auctionId) throws IOException {
         AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEventRequest.class);
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(auctionService.eventAuction(auctionId, auctionEventRequest), httpHeaders, HttpStatus.OK);
+        this.simpMessagingTemplate.convertAndSend("/topic/auctions/"+auctionId+"/event",
+                auctionService.eventAuction(auctionId, auctionEventRequest));
+//        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+//        return new ResponseEntity<>(auctionService.eventAuction(auctionId, auctionEventRequest), httpHeaders, HttpStatus.OK);
 
     }
 }
