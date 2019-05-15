@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
-public class NaverSignUpRequest {
+public class NaverSignInRequest {
     private String naverId;
     @JsonProperty("access_token")
     private String accessToken;

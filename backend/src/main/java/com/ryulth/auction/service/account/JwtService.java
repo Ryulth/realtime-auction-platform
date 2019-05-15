@@ -7,5 +7,6 @@ import java.util.Map;
 @Service
 public interface JwtService {
     <T> String create(String key, T data, String subject);
-    Map<String, Object> get(String key);
+    String decode(String token);
+    Map<String, Object> get(String key, String token);
 }
