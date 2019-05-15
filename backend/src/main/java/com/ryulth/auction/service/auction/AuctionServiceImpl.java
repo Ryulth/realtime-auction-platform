@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,8 @@ public class AuctionServiceImpl implements AuctionService {
     @Autowired
     AuctionEventService auctionEventService;
 
+    private static final String timePattern = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter formatter =DateTimeFormatter.ofPattern(timePattern).withZone(ZoneId.of("Asia/Seoul"));//;
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
@@ -67,8 +70,8 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElse(Auction.builder()
                         .productId(productId)
                         .auctionType(auctionType.getValue())
-                        .startTime(product.getStartTime())
-                        .endTime(product.getEndTime())
+                        .startTime(ZonedDateTime.parse(auctionEnrollRequest.getStartTime(),formatter))
+                        .endTime(ZonedDateTime.parse(auctionEnrollRequest.getEndTime(),formatter))
                         .price(product.getLowerLimit())
                         .version(0L)
                         .build());

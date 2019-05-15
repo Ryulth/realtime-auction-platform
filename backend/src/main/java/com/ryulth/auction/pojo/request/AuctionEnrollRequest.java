@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 public class AuctionEnrollRequest {
     private String auctionType;
     private long productId;
+    private String startTime;
+    private String endTime;
     @JsonIgnore
     public AuctionType getAuctionTypeEnum(){
         return AuctionType.fromText(this.auctionType);

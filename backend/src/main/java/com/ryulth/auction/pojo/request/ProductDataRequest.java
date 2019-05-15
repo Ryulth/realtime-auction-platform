@@ -17,6 +17,4 @@ public class ProductDataRequest {
     private String spec;
     private long upperLimit;
     private long lowerLimit;
-    private String startTime;
-    private String endTime;
 }

@@ -17,16 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
 @Primary
 public class ProductServiceImpl implements ProductService {
-    private static final String timePattern = "yyyy-MM-dd HH:mm:ss";
-    private static final DateTimeFormatter formatter =DateTimeFormatter.ofPattern(timePattern).withZone(ZoneId.of("Asia/Seoul"));//;
     private static final HttpHeaders httpHeaders = new HttpHeaders();
     @Autowired
     ObjectMapper objectMapper;
@@ -41,8 +36,6 @@ public class ProductServiceImpl implements ProductService {
                 .spec(productDataRequest.getSpec())
                 .lowerLimit(productDataRequest.getLowerLimit())
                 .upperLimit(productDataRequest.getUpperLimit())
-                .startTime(ZonedDateTime.parse(productDataRequest.getStartTime(),formatter))
-                .endTime(ZonedDateTime.parse(productDataRequest.getEndTime(),formatter))
                 .build();
         productRepository.save(newProduct);
         return ProductDetailResponse.builder().product(newProduct).build();
@@ -71,8 +64,6 @@ public class ProductServiceImpl implements ProductService {
         updateProduct.setSpec(productDataRequest.getSpec());
         updateProduct.setLowerLimit(productDataRequest.getLowerLimit());
         updateProduct.setUpperLimit(productDataRequest.getUpperLimit());
-        updateProduct.setStartTime(ZonedDateTime.parse(productDataRequest.getStartTime(),formatter));
-        updateProduct.setEndTime(ZonedDateTime.parse(productDataRequest.getEndTime(),formatter));
         productRepository.save(updateProduct);
         return "UPDATE PRODUCT";
     }
