@@ -13,6 +13,9 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamRecords;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +27,13 @@ public class ProductController {
     private static Logger logger = LoggerFactory.getLogger(AuctionController.class);
     @Autowired
     ProductService productService;
+    private static final HttpHeaders httpHeaders = new HttpHeaders();
 
     @CrossOrigin("*")
     @PostMapping("/product")
-    public String enrollProduct(@RequestBody String payload) throws IOException {
-        return productService.enrollProduct(payload);
+    public ResponseEntity<ProductDetailResponse> enrollProduct(@RequestBody String payload) throws IOException {
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        return new ResponseEntity<>(productService.enrollProduct(payload), httpHeaders, HttpStatus.OK);
     }
 
     @CrossOrigin("*")

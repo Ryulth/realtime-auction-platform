@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Service
 public interface ProductService {
-    String enrollProduct(String payload) throws IOException;
+    ProductDetailResponse enrollProduct(String payload) throws IOException;
 
     ResponseEntity<ProductListResponse> getAllProducts() throws JsonProcessingException;
 

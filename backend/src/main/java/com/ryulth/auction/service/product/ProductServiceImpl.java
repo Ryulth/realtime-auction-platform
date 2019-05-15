@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductRepository productRepository;
     @Override
-    public String enrollProduct(String payload) throws IOException {
+    public ProductDetailResponse enrollProduct(String payload) throws IOException {
         ProductDataRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, ProductDataRequest.class);
         Product newProduct = Product.builder()
@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
                 .endTime(ZonedDateTime.parse(productDataRequest.getEndTime(),formatter))
                 .build();
         productRepository.save(newProduct);
-        return "SAVE PRODUCT";
+        return ProductDetailResponse.builder().product(newProduct).build();
     }
 
     @Override
