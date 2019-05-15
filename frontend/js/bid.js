@@ -5,13 +5,13 @@ const auctionId = location.href.substr(location.href.lastIndexOf('?') + 1)
 let auctionType;
 let clientVersion = 0;
 let stompClient;
+getAuction();
 
 $(document).ready(function () {
-    if(jwtToken == null){
+    if (jwtToken == null) {
         let popUrl = `naverlogin.html`;
         window.open(popUrl, 'naverloginpop', 'titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
     }
-    getAuction();
     connect();
     $("#price-submit").on("click", bidAction);
     $(".price-input").on('keyup', function (e) {
@@ -41,14 +41,16 @@ function connect() {
         }
     });
 }
-function receiveAuctionEvent(auctionEvents){
+
+function receiveAuctionEvent(auctionEvents) {
     $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents));
-    if(auctionEvents.length === 1){
+    if (auctionEvents.length === 1) {
         showBidResult(true);
-    }else{
+    } else {
         showBidResult(false);
     }
 }
+
 function bidAction() {
     $inputPrice = $(".price-input");
     let inputPriceValue = uncomma($inputPrice.val());
@@ -87,7 +89,9 @@ function getAuction() {
             $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents));
             //$(".detail-enroll-person-data")[0].innerText = responseBody.auctionEvents[0].userId+ " (" + responseBody.auctionEvents[0].biddingTime + ")";
             $(".detail-description")[0].innerText = response.product.spec;
-
+        },
+        error: function (response) {
+            alert("error");
         }
     });
 }
