@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ryulth.auction.domain.Product;
-import com.ryulth.auction.pojo.request.ProductDataRequest;
+import com.ryulth.auction.pojo.request.ProductEnrollRequest;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.repository.ProductRepository;
@@ -29,13 +29,13 @@ public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     @Override
     public ProductDetailResponse enrollProduct(String payload) throws IOException {
-        ProductDataRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .readValue(payload, ProductDataRequest.class);
+        ProductEnrollRequest productEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .readValue(payload, ProductEnrollRequest.class);
         Product newProduct = Product.builder()
-                .name(productDataRequest.getName())
-                .spec(productDataRequest.getSpec())
-                .lowerLimit(productDataRequest.getLowerLimit())
-                .upperLimit(productDataRequest.getUpperLimit())
+                .name(productEnrollRequest.getName())
+                .spec(productEnrollRequest.getSpec())
+                .lowerLimit(productEnrollRequest.getLowerLimit())
+                .upperLimit(productEnrollRequest.getUpperLimit())
                 .build();
         productRepository.save(newProduct);
         return ProductDetailResponse.builder().product(newProduct).build();
@@ -57,8 +57,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public String  updateProduct(Long productId, String payload) throws IOException {
-        ProductDataRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .readValue(payload, ProductDataRequest.class);
+        ProductEnrollRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .readValue(payload, ProductEnrollRequest.class);
         Product updateProduct = productRepository.getOne(productId);
         updateProduct.setName(productDataRequest.getName());
         updateProduct.setSpec(productDataRequest.getSpec());

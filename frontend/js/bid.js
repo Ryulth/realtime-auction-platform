@@ -11,17 +11,18 @@ $(document).ready(function () {
     if (jwtToken == null) {
         let popUrl = `naverlogin.html`;
         window.open(popUrl, 'naverloginpop', 'titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
+    } else {
+        connect();
+        $("#price-submit").on("click", bidAction);
+        $(".price-input").on('keyup', function (e) {
+            var _this = this;
+            numberFormat(_this)
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                $("#price-submit").click();
+            }
+        })
     }
-    connect();
-    $("#price-submit").on("click", bidAction);
-    $(".price-input").on('keyup', function (e) {
-        var _this = this;
-        numberFormat(_this)
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            $("#price-submit").click();
-        }
-    })
 });
 
 function connect() {
