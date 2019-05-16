@@ -3,6 +3,7 @@ package com.ryulth.auction.service.auction;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.domain.User;
+import com.ryulth.auction.pojo.model.AuctionData;
 import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
@@ -13,6 +14,7 @@ import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
+import com.ryulth.auction.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,8 @@ public class AuctionServiceImpl implements AuctionService {
     AuctionRepository auctionRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    UserRepository userRepository;
     @Autowired
     RedisTemplate redisTemplate;
     @Autowired
@@ -111,7 +115,18 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionListResponse getAllAuctions() {
         List<Auction> auctions = auctionRepository.findAll();
-        return AuctionListResponse.builder().auctions(auctions).build();
+        List<AuctionData> auctionData = new ArrayList<>();
+
+        for (Auction auction : auctions) {
+            User user = userRepository.getOne(auction.getUserId());
+            Product product = productRepository.getOne(auction.getProductId());
+            auctionData.add(AuctionData.builder()
+                    .auctionId(auction.getId())
+                    .nickName(user.getNickName())
+                    .product(product)
+                    .build());
+        }
+        return AuctionListResponse.builder().auctions(auctionData).build();
     }
 
     @Override
