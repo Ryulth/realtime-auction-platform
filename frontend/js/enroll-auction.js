@@ -1,5 +1,6 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
+let auctionType = "basic"
 $(document).ready(function () {
     if (jwtToken == null) {
         let popUrl = `naverlogin.html`;

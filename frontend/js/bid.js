@@ -46,7 +46,9 @@ function connect() {
 function receiveAuctionEvent(auctionEvents) {
     setAuctionStatus(auctionEvents);
     let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType == "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
-    $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents, lastIndex));
+    if (lastIndex !== -1) {
+        $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents, lastIndex));
+    }
     setBiddingPrice();
     setBiddingTable(auctionEvents);
     $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
@@ -123,7 +125,9 @@ function getAuction() {
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
-            $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
+            if (lastIndex !== -1) {
+                $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
+            }
             setBiddingPrice();
             $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
             $(".detail-description")[0].innerText = response.product.spec;
@@ -146,8 +150,10 @@ function setAuctionType() {
 }
 
 function setBiddingPrice() {
-    let biddingPrice = parseInt(parseInt(uncomma($(".current-price")[0].innerText)) / 10);
-    $(".price-input").val(biddingPrice)
+    if (auctionType === "live") {
+        let biddingPrice = parseInt(parseInt(uncomma($(".current-price")[0].innerText)) / 10);
+        $(".price-input").val(biddingPrice)
+    }
 }
 
 function setAuctionStatus(auctionEvents) {
@@ -183,7 +189,10 @@ function numberFormat(obj) {
 }
 
 function setBiddingTable(auctionEvents) {
-    if(auctionEvents.length !== 1){
+    if (auctionEvents.length !== 1) {
+        $("#bid-history-body").empty();
+    }
+    if (auctionEvents.length === 1 && auctionEvents[0].auctionEventType === "ENROLL") {
         $("#bid-history-body").empty();
     }
     auctionEvents.forEach(function (item, idex, array) {

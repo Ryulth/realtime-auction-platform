@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -160,11 +161,12 @@ public class AuctionServiceImpl implements AuctionService {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         List<Auction> auctions = auctionRepository.findByEndTimeLessThanEqualAndOnAuction(now, 1);
         auctions.stream().forEach(a -> {
-            logger.info(a.getId()+"종료");
+            logger.info(a.getId() + "종료");
             a.setOnAuction(0);
             auctionRepository.save(a);
             ValueOperations vop = redisTemplate.opsForValue();
             vop.set(AUCTION_ONGOING_REDIS + a.getId(), false);
+
 
             AuctionEvent closeEvent = AuctionEvent.builder()
                     .userId(a.getUserId())
@@ -176,8 +178,17 @@ public class AuctionServiceImpl implements AuctionService {
                     .build();
             try {
                 xAdd(AUCTION_EVENTS_REDIS + a.getId(), a.getId() + "-" + Long.MAX_VALUE, closeEvent);
+                List<AuctionEvent> auctionEvents = new ArrayList<>();
+                auctionEvents.add(closeEvent);
+                this.simpMessagingTemplate.convertAndSend("/topic/auctions/" + a.getId() + "/event",
+                        AuctionEventsResponse.builder()
+                                .auctionEvents(auctionEvents)
+                                .auctionType(a.getAuctionType())
+                                .build()
+                );
             } catch (RedisSystemException ignore) {
             }
+
         });
 
     }
