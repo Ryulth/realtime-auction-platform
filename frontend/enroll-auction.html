@@ -9,7 +9,7 @@
         rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="./css/main.css">
     <link rel="stylesheet" type="text/css" href="./css/bid-page.css">
-    <link rel="stylesheet" type="text/css" href="./css/register-auction.css">
+    <link rel="stylesheet" type="text/css" href="./css/enroll-auction.css">
 
 </head>
 
@@ -57,31 +57,26 @@
                     <div class="detail-category">
                         <ul class="detail-category-list">
                             <li>
-                                <span class="category">안녕</span>
+                                <a class="category">경매 종류</a>
                             </li>
                             <li>
-                                <span class="category">안녕안녕안녕안녕</span>
+                                <a class="category basic-auction-button">일반 경매</a>
                             </li>
                             <li>
-                                <span class="category">안녕안녕</span>
-                            </li>
-                            <li>
-                                <span class="category">안녕안녕안녕안녕</span>
-                            </li>
-                            <li>
-                                <span class="category">안녕안녕</span>
-                            </li>
-                            <li>
-                                <span class="category">안녕</span>
-                            </li>
-                            <li>
-                                <span class="category">안녕안녕</span>
+                                <a class="category live-auction-button">실시간 경매</a>
                             </li>
                         </ul>
                     </div>
+                    <div class="detail-price">
+                            <span class="lower-price-text">
+                                    경매 종류 : &nbsp;
+                                <input type="text" class="auction-type" value = "일반 경매" readonly >
+                                
+                            </span>
+                        </div>
                     <div class="detail-time">
                         <i class="far fa-clock">경매 기간</i>
-
+                        <!--
                         <div class="start-time">
                             시작 날짜/시간 :
                             <input type="datetime-local" class="start-input">
@@ -89,6 +84,12 @@
                         <div class="end-time">
                             종료 날짜/시간 :
                             <input type="datetime-local" class="end-input">
+                        </div>
+                        -->
+                        <div class="going-time">
+                                기간 :
+                                <input type="number" class="going-input">
+                                분
                         </div>
                     </div>
                     <div class="detail-price">

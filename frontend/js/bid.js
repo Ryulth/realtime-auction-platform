@@ -1,7 +1,7 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
 const auctionId = location.href.substr(location.href.lastIndexOf('?') + 1)
-
+let userId;
 let auctionType;
 let clientVersion = 0;
 let stompClient;
@@ -45,10 +45,30 @@ function connect() {
 
 function receiveAuctionEvent(auctionEvents) {
     $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents));
-    if (auctionEvents.length === 1) {
+    $(".detail-enroll-person-data")[0].innerText = auctionEvents[auctionEvents.length - 1].nickName + " (" + auctionEvents[auctionEvents.length - 1].eventTime + ")";
+    clientVersion = auctionEvents[auctionEvents.length - 1].version;
+    if (auctionEvents.length === 1 & userId === auctionEvents[auctionEvents.length - 1].userId) {
         showBidResult(true);
+    } else if (userId !== auctionEvents[auctionEvents.length - 1].userId) {
+
     } else {
         showBidResult(false);
+    }
+}
+function getCurrentPrice(auctionEvents) {
+    if (auctionType == "basic") {
+        return auctionEvents[auctionEvents.length - 1].price;
+    } else if (auctionType == "live") {
+        if(auctionEvents.length===1){
+            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
+        }
+        let sum = 0 ;
+        auctionEvents.forEach(function (item, idex, array) {
+            sum+=item.price;
+        });
+        return sum;
+    } else {
+        return -1;
     }
 }
 
@@ -66,6 +86,9 @@ function bidAction() {
         type: "POST",
         contentType: "application/json",
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         data: JSON.stringify(reqBody),
         dataType: 'json',
         success: function (response) {
@@ -81,14 +104,21 @@ function getAuction() {
         type: "GET",
         cache: false,
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         success: function (response) {
             console.log(response)
+            userId = response.userId;
+            console.log(userId);
             auctionType = response.auction.auctionType;
+            let auctionEvents = response.auctionEvents;
+            clientVersion = auctionEvents[auctionEvents.length-1].version;
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
             $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents));
-            //$(".detail-enroll-person-data")[0].innerText = responseBody.auctionEvents[0].userId+ " (" + responseBody.auctionEvents[0].biddingTime + ")";
+            $(".detail-enroll-person-data")[0].innerText = auctionEvents[auctionEvents.length - 1].nickName + " (" + auctionEvents[auctionEvents.length - 1].eventTime + ")";
             $(".detail-description")[0].innerText = response.product.spec;
         },
         error: function (response) {
@@ -97,17 +127,6 @@ function getAuction() {
     });
 }
 
-function getCurrentPrice(auctionEvents) {
-    if (auctionType == "basic") {
-        return auctionEvents[auctionEvents.length - 1].price;
-    } else if (auctionType == "live") {
-        auctionEvents.forEach(function (item, idex, array) {
-
-        });
-    } else {
-        return -1;
-    }
-}
 
 function showBidResult(success) {
     if (success) {

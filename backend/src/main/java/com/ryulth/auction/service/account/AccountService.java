@@ -8,6 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface AccountService {
     AccountSignInResponse signIn(NaverSignInRequest naverSignUpRequest);
-    String checkValidation(String token);
+    boolean checkValidation(String token);
     User getUser(String token);
 }

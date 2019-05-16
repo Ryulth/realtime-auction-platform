@@ -1,6 +1,7 @@
 package com.ryulth.auction.service.product;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ryulth.auction.domain.User;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +11,11 @@ import java.io.IOException;
 
 @Service
 public interface ProductService {
-    ProductDetailResponse enrollProduct(String payload) throws IOException;
+    ProductDetailResponse enrollProduct(String payload, User user) throws IOException;
 
-    ResponseEntity<ProductListResponse> getAllProducts() throws JsonProcessingException;
+    ProductListResponse getAllProducts() throws JsonProcessingException;
 
-    ResponseEntity<ProductDetailResponse> getOneProducts(Long productId) throws JsonProcessingException;
+    ProductDetailResponse getOneProducts(Long productId) throws JsonProcessingException;
 
     String updateProduct(Long productId, String payload) throws IOException;
 

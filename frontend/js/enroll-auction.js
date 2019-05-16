@@ -1,14 +1,25 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
-
+let auctionType= "basic";
 $(document).ready(function () {
-    // if (jwtToken == null) {
-    //     let popUrl = `naverlogin.html`;
-    //     window.open(popUrl, 'naverloginpop', 'titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
-    // }
+    if (jwtToken == null) {
+        let popUrl = `naverlogin.html`;
+        window.open(popUrl, 'naverloginpop', 'titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
+    }
     $("#enroll-submit").on("click", enrollProduct);
     $(".lower-price-input").on('keyup', numberFormatEvent);
     $(".upper-price-input").on('keyup', numberFormatEvent);
+    $auctionTypeInput = $(".auction-type");
+    
+    $(".basic-auction-button").on("click" ,function(e){
+        $auctionTypeInput.val("일반 경매")
+        auctionType= "basic";
+    })
+    $(".live-auction-button").on("click" ,function(e){
+        $auctionTypeInput.val("실시간 경매")
+        auctionType= "live";
+    })
+    
 });
 
 function enrollProduct() {
@@ -20,14 +31,18 @@ function enrollProduct() {
     let reqBody = {
         "name": productName,
         "spec": productSpec,
-        "lowerLimit": lowerLimit,
-        "upperLimit": upperLimit
-    }
+        "lowerLimit": uncomma(lowerLimit),
+        "upperLimit": uncomma(upperLimit)
+    };
+
     $.ajax({
         async: true, // false 일 경우 동기 요청으로 변경
         type: "POST",
         contentType: "application/json",
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         data: JSON.stringify(reqBody),
         dataType: 'json',
         success: function (response) {
@@ -35,30 +50,31 @@ function enrollProduct() {
             console.log(response.product.id);
         }
     });
-    //console.log(`${productName}/${productSpec}/${lowerLimit}/${upperLimit}/${startTime}/${endTime}`)
 }
 
 function enrollAuction(productId) {
     let sendUrl = `${baseUrl}/auction`;
-    let startTime = $(".start-input").val().replace("T"," ") + ":00";
-    let endTime = $(".end-input").val().replace("T"," ") +":00";
-    alert($(".start-input").val().replace("T"," "));
+    let goingTime = $(".going-input").val();
     let reqBody = {
-        "auctionType": "basic",
-        "productId" : productId,
-        "startTime": startTime,
-        "endTime": endTime
-    }
+        "auctionType": auctionType,
+        "productId": productId,
+        "goingTime" : goingTime
+
+    };
     $.ajax({
         async: true, // false 일 경우 동기 요청으로 변경
         type: "POST",
         contentType: "application/json",
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         data: JSON.stringify(reqBody),
         dataType: 'json',
         success: function (response) {
             console.log(response);
-            alert("test")
+            alert("등록 완료")
+            window.location.reload();
         }
     });
 }

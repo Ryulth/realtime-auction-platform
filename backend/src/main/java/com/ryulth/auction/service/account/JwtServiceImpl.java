@@ -25,12 +25,12 @@ public class JwtServiceImpl implements JwtService{
     }
 
     @Override
-    public String decode(String token) {
+    public boolean decode(String token) {
         try {
             Jws<Claims> jws = Jwts.parser().setSigningKey(this.generateKey()).parseClaimsJws(token);
-            return jws.toString();
+            return true;
         }catch (SignatureException e){
-            return "fail";
+            return false;
         }
     }
 

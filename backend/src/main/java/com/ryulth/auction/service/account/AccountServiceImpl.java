@@ -27,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountSignInResponse signIn(NaverSignInRequest naverSignUpRequest) {
         User user = userRepository.findByNaverId(naverSignUpRequest.getNaverId()).orElse(User.builder().naverId(naverSignUpRequest.getNaverId())
                 .email(naverSignUpRequest.getEmail())
-                .nickName(naverSignUpRequest.getEmail())
+                .nickName(naverSignUpRequest.getNickName())
                 .build());
         if(user.getId() ==null){
             logger.info("회원가입");
@@ -37,7 +37,7 @@ public class AccountServiceImpl implements AccountService {
         return AccountSignInResponse.builder().jwtToken(token).build();
     }
     @Override
-    public String checkValidation(String token) {
+    public boolean checkValidation(String token) {
         return jwtService.decode(token);
     }
 

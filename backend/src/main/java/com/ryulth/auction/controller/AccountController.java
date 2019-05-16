@@ -30,7 +30,7 @@ public class AccountController {
 
     @CrossOrigin("*")
     @PostMapping("/accountTest")
-    public String test(@RequestHeader("Authorization") String token) {
+    public boolean test(@RequestHeader("Authorization") String token) {
         System.out.println(accountService.getUser(token));
         return accountService.checkValidation(token);
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ryulth.auction.domain.Product;
+import com.ryulth.auction.domain.User;
 import com.ryulth.auction.pojo.request.ProductEnrollRequest;
 import com.ryulth.auction.pojo.response.ProductDetailResponse;
 import com.ryulth.auction.pojo.response.ProductListResponse;
@@ -11,9 +12,6 @@ import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,10 +26,11 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductRepository productRepository;
     @Override
-    public ProductDetailResponse enrollProduct(String payload) throws IOException {
+    public ProductDetailResponse enrollProduct(String payload, User user) throws IOException {
         ProductEnrollRequest productEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, ProductEnrollRequest.class);
         Product newProduct = Product.builder()
+                .userId(user.getId())
                 .name(productEnrollRequest.getName())
                 .spec(productEnrollRequest.getSpec())
                 .lowerLimit(productEnrollRequest.getLowerLimit())
@@ -42,17 +41,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<ProductListResponse> getAllProducts() throws JsonProcessingException {
+    public ProductListResponse getAllProducts() throws JsonProcessingException {
         List<Product> products = productRepository.findAll();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(ProductListResponse.builder().products(products).build(),httpHeaders, HttpStatus.OK);
+        return ProductListResponse.builder().products(products).build();
     }
 
     @Override
-    public ResponseEntity<ProductDetailResponse> getOneProducts(Long productId) throws JsonProcessingException {
+    public ProductDetailResponse getOneProducts(Long productId) throws JsonProcessingException {
         Product product = productRepository.getOne(productId);
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(ProductDetailResponse.builder().product(product).build(),httpHeaders, HttpStatus.OK);
+        return ProductDetailResponse.builder().product(product).build();
     }
 
     @Override

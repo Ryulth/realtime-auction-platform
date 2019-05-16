@@ -3,11 +3,13 @@ package com.ryulth.auction.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ryulth.auction.domain.User;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
 import com.ryulth.auction.pojo.response.AuctionDataResponse;
 import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
+import com.ryulth.auction.service.account.AccountService;
 import com.ryulth.auction.service.auction.AuctionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +32,15 @@ public class AuctionController {
     AuctionService auctionService;
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    AccountService accountService;
+
     private static final HttpHeaders httpHeaders = new HttpHeaders();
 
     @CrossOrigin("*")
     @GetMapping("/auctions")
-    public ResponseEntity<AuctionListResponse> getAllAuctions() throws JsonProcessingException {
+    public ResponseEntity<AuctionListResponse> getAllAuctions(
+    ) throws JsonProcessingException {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         return new ResponseEntity<>(auctionService.getAllAuctions(), httpHeaders, HttpStatus.OK);
     }
@@ -42,19 +48,23 @@ public class AuctionController {
     @CrossOrigin("*")
     @PostMapping("/auction")
     public Long enrollAuction(
+            @RequestHeader("Authorization") String token,
             @RequestBody String payload) throws IOException {
+        User user = accountService.getUser(token);
         AuctionEnrollRequest auctionEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEnrollRequest.class);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return auctionService.enrollAuction(auctionEnrollRequest);
+        return auctionService.enrollAuction(auctionEnrollRequest,user);
     }
 
     @CrossOrigin("*")
     @GetMapping("/auctions/{auctionId}")
     public ResponseEntity<AuctionDataResponse> getAuction(
+            @RequestHeader("Authorization") String token,
             @PathVariable("auctionId") Long auctionId) {
+        User user = accountService.getUser(token);
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        return new ResponseEntity<>(auctionService.getAuction(auctionId), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.getAuction(auctionId,user), httpHeaders, HttpStatus.OK);
     }
 
     @CrossOrigin("*")
@@ -68,12 +78,14 @@ public class AuctionController {
     @CrossOrigin("*")
     @PostMapping("/auctions/{auctionId}/event")
     public void eventAuction(
+            @RequestHeader("Authorization") String token,
             @RequestBody String payload,
             @PathVariable("auctionId") Long auctionId) throws IOException {
+        User user = accountService.getUser(token);
         AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEventRequest.class);
         this.simpMessagingTemplate.convertAndSend("/topic/auctions/"+auctionId+"/event",
-                auctionService.eventAuction(auctionId, auctionEventRequest));
+                auctionService.eventAuction(auctionId, auctionEventRequest,user));
 //        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 //        return new ResponseEntity<>(auctionService.eventAuction(auctionId, auctionEventRequest), httpHeaders, HttpStatus.OK);
 
