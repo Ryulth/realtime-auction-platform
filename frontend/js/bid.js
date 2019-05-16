@@ -56,7 +56,7 @@ function receiveAuctionEvent(auctionEvents) {
     if (auctionEvents.length === 1 & userId === auctionEvents[auctionEvents.length - 1].userId) {
         showBidResult(true);
     } else if (userId !== auctionEvents[auctionEvents.length - 1].userId) {
-
+        showBidResult(false);
     } else {
         showBidResult(false);
     }
