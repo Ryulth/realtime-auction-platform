@@ -20,6 +20,9 @@ public class User {
     private Long id;
 
     @Column
+    private String naverId;
+
+    @Column
     private String email;
 
     @Column

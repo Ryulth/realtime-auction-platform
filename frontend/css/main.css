@@ -50,19 +50,35 @@ div {
 
     display: flex;
     align-items: center;
-
+    justify-content: center;
     position: relative;
 }
 
-#header .header-content .menu-icon {
-    font-size: 24px;
-    color: #2e2e2e;
-
+#header .header-content .menu-icon-href {
+    display: block;
+    position: absolute;
+    left: 110px;
 }
 
-#header .header-content .search_input {
+#header .header-content .menu-icon-href .menu-icon {
+    font-size: 24px;
+    color: #2e2e2e;
+}
+
+#header .header-content .add-auction-icon-href {
+    display: block;
     position: absolute;
-    right: 180px;
+    right: 170px;
+}
+
+#header .header-content .add-auction-icon-href .add-auction-icon {
+    font-size: 28px;
+    color: #2e2e2e;
+}
+
+#header .header-content .search_input[type="text"] {
+    /*position: absolute;*/
+    /*right: 180px;*/
 
     width: 300px;
     height: 38px;
@@ -74,15 +90,15 @@ div {
     color: #2e2e2e;
     font-weight: 300;
     box-shadow: 0 0 1px 0px #4a4a4a inset, 0 0 1px 0px #4a4a4a;
-    /*-webkit-transition: all 200ms ease;*/
-    /*-moz-transition: all 200ms ease;*/
-    /*-ms-transition: all 200ms ease;*/
-    /*-o-transition: all 200ms ease;*/
-    /*transition: all 200ms ease;*/
+    -webkit-transition: all 200ms ease;
+    -moz-transition: all 200ms ease;
+    -ms-transition: all 200ms ease;
+    -o-transition: all 200ms ease;
+    transition: all 200ms ease;
 }
 
-#header .header-content .search_input:focus {
-     /*border: solid 1px #2fce98;*/
+#header .header-content .search_input[type="text"]:focus {
+     border: solid 1px #2fce98;
 }
 
 #header .header-content .user-icon-href {
@@ -139,9 +155,7 @@ div {
     width: 80px;
     height: 80px;
     border-radius: 40px;
-    margin-left: 25px;
-    margin-top: 15px;
-
+    margin: 15px 25px 0 25px;
 }
 
 #content .category-list li .category-name{

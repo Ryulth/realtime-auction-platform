@@ -1,27 +1,28 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
 const auctionId = location.href.substr(location.href.lastIndexOf('?') + 1)
-
+let userId;
 let auctionType;
 let clientVersion = 0;
 let stompClient;
+getAuction();
 
 $(document).ready(function () {
-    if(jwtToken == null){
+    if (jwtToken == null) {
         let popUrl = `naverlogin.html`;
         window.open(popUrl, 'naverloginpop', 'titlebar=1, resizable=1, scrollbars=yes, width=600, height=550');
+    } else {
+        connect();
+        $("#price-submit").on("click", bidAction);
+        $(".price-input").on('keyup', function (e) {
+            var _this = this;
+            numberFormat(_this)
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                $("#price-submit").click();
+            }
+        })
     }
-    getAuction();
-    connect();
-    $("#price-submit").on("click", bidAction);
-    $(".price-input").on('keyup', function (e) {
-        var _this = this;
-        numberFormat(_this)
-        if (event.keyCode === 13) {
-            event.preventDefault();
-            $("#price-submit").click();
-        }
-    })
 });
 
 function connect() {
@@ -41,14 +42,43 @@ function connect() {
         }
     });
 }
-function receiveAuctionEvent(auctionEvents){
-    $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents));
-    if(auctionEvents.length === 1){
+
+function receiveAuctionEvent(auctionEvents) {
+    setAuctionStatus(auctionEvents);
+    let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType == "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
+    if (lastIndex !== -1) {
+        $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents, lastIndex));
+    }
+    setBiddingPrice();
+    setBiddingTable(auctionEvents);
+    $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
+    clientVersion = auctionEvents[auctionEvents.length - 1].version;
+    if (auctionEvents.length === 1 & userId === auctionEvents[auctionEvents.length - 1].userId) {
         showBidResult(true);
-    }else{
+    } else if (userId !== auctionEvents[auctionEvents.length - 1].userId) {
+        showBidResult(false);
+    } else {
         showBidResult(false);
     }
 }
+
+function getCurrentPrice(auctionEvents, lastIndex) {
+    if (auctionType == "basic") {
+        return auctionEvents[lastIndex].price;
+    } else if (auctionType == "live") {
+        if (auctionEvents.length === 1) {
+            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
+        }
+        let sum = 0;
+        auctionEvents.forEach(function (item, idex, array) {
+            sum += item.price;
+        });
+        return sum;
+    } else {
+        return -1;
+    }
+}
+
 function bidAction() {
     $inputPrice = $(".price-input");
     let inputPriceValue = uncomma($inputPrice.val());
@@ -63,6 +93,9 @@ function bidAction() {
         type: "POST",
         contentType: "application/json",
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         data: JSON.stringify(reqBody),
         dataType: 'json',
         success: function (response) {
@@ -78,29 +111,56 @@ function getAuction() {
         type: "GET",
         cache: false,
         url: sendUrl,
+        beforeSend: function (request) {
+            request.setRequestHeader("Authorization", jwtToken);
+        },
         success: function (response) {
-            console.log(response)
+            userId = response.userId;
             auctionType = response.auction.auctionType;
+            setAuctionType();
+            let auctionEvents = response.auctionEvents;
+            let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType === "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
+            clientVersion = auctionEvents[auctionEvents.length - 1].version;
+            setAuctionStatus(auctionEvents);
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
-            $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents));
-            //$(".detail-enroll-person-data")[0].innerText = responseBody.auctionEvents[0].userId+ " (" + responseBody.auctionEvents[0].biddingTime + ")";
+            if (lastIndex !== -1) {
+                $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
+            }
+            setBiddingPrice();
+            $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
             $(".detail-description")[0].innerText = response.product.spec;
-
+            setBiddingTable(auctionEvents);
+        },
+        error: function (response) {
+            alert("error");
         }
     });
 }
 
-function getCurrentPrice(auctionEvents) {
+function setAuctionType() {
     if (auctionType == "basic") {
-        return auctionEvents[auctionEvents.length - 1].price;
-    } else if (auctionType == "live") {
-        auctionEvents.forEach(function (item, idex, array) {
-
-        });
+        $(".auction-type")[0].innerText = "일반 경매";
     } else {
-        return -1;
+        $(".auction-type")[0].innerText = "실시간 경매";
+        $(".price-input").prop("readonly", true);
+
+    }
+}
+
+function setBiddingPrice() {
+    if (auctionType === "live") {
+        let biddingPrice = parseInt(parseInt(uncomma($(".current-price")[0].innerText)) / 10);
+        $(".price-input").val(biddingPrice)
+    }
+}
+
+function setAuctionStatus(auctionEvents) {
+    if (auctionEvents[auctionEvents.length - 1].auctionEventType === "CLOSE") {
+        $(".auction-status").removeClass("status-ongoing");
+        $(".auction-status").addClass("status-close");
+        $(".auction-status")[0].innerText = "경매 종료";
     }
 }
 
@@ -126,4 +186,24 @@ function uncomma(str) {
 
 function numberFormat(obj) {
     obj.value = comma(uncomma(obj.value));
+}
+
+function setBiddingTable(auctionEvents) {
+    if (auctionEvents.length !== 1) {
+        $("#bid-history-body").empty();
+    }
+    if (auctionEvents.length === 1 && auctionEvents[0].auctionEventType === "ENROLL") {
+        $("#bid-history-body").empty();
+    }
+    auctionEvents.forEach(function (item, idex, array) {
+        if (item.auctionEventType !== "CLOSE") {
+            let newRow = `<tr>     
+            <td>${item.nickName}</td>
+            <td>${item.eventTime}</td>
+            <td>${comma(item.price)}</td>
+            </tr>`;
+            $("#bid-history-body").prepend(newRow);
+        }
+    });
+
 }

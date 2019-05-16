@@ -1,6 +1,6 @@
 package com.ryulth.auction.controller;
 
-import com.ryulth.auction.pojo.request.NaverSignUpRequest;
+import com.ryulth.auction.pojo.request.NaverSignInRequest;
 import com.ryulth.auction.pojo.response.AccountSignInResponse;
 import com.ryulth.auction.service.account.AccountService;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class AccountController {
 
     @CrossOrigin("*")
     @PostMapping("/signin")
-    public ResponseEntity<AccountSignInResponse> signIn(@RequestBody NaverSignUpRequest naverSignUpRequest) {
+    public ResponseEntity<AccountSignInResponse> signIn(@RequestBody NaverSignInRequest naverSignUpRequest) {
         logger.info("로그인");
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
         return new ResponseEntity<>(accountService.signIn(naverSignUpRequest), httpHeaders, HttpStatus.OK);
@@ -30,7 +30,8 @@ public class AccountController {
 
     @CrossOrigin("*")
     @PostMapping("/accountTest")
-    public String test(@RequestHeader("Authorization") String token) {
+    public boolean test(@RequestHeader("Authorization") String token) {
+        System.out.println(accountService.getUser(token));
         return accountService.checkValidation(token);
     }
 }

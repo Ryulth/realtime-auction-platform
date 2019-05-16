@@ -26,6 +26,9 @@ public class Product {
     private Long id;
 
     @Column
+    private Long userId;
+
+    @Column
     private String name;
 
     @Lob
@@ -42,16 +45,8 @@ public class Product {
     private int onSale;
 
     @Column
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private ZonedDateTime createTime;
-
-    @Column
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private ZonedDateTime startTime;
-
-    @Column
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private ZonedDateTime endTime;
 
     @PrePersist
     void setUp(){

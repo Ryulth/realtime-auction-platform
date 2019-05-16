@@ -12,11 +12,9 @@ import lombok.RequiredArgsConstructor;
 @Builder
 @RequiredArgsConstructor // Jackson will deserialize using this and then invoking setter
 @AllArgsConstructor(onConstructor = @__(@JsonIgnore)) // Lombok builder use this
-public class ProductDataRequest {
+public class ProductEnrollRequest {
     private String name;
     private String spec;
     private long upperLimit;
     private long lowerLimit;
-    private String startTime;
-    private String endTime;
 }

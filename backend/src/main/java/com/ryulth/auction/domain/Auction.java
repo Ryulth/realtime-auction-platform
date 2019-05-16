@@ -23,6 +23,9 @@ public class Auction {
     private Long id;
 
     @Column
+    private Long userId;
+
+    @Column
     private Long productId;
 
     @Column
@@ -37,18 +40,18 @@ public class Auction {
     @Column
     private String auctionType;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private ZonedDateTime createTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private ZonedDateTime startTime;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private ZonedDateTime endTime;
     @PrePersist
     void setUp(){
         this.onAuction = 1 ;
-        ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
-        this.createTime = ZonedDateTime.now(seoulZoneId);
+        ZoneId zoneId = ZoneId.of("Asia/Seoul");
+        this.createTime = ZonedDateTime.now(zoneId);
     }
 }

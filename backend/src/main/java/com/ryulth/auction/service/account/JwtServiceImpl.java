@@ -1,7 +1,6 @@
 package com.ryulth.auction.service.account;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +24,16 @@ public class JwtServiceImpl implements JwtService{
         return jwt;
     }
 
+    @Override
+    public boolean decode(String token) {
+        try {
+            Jws<Claims> jws = Jwts.parser().setSigningKey(this.generateKey()).parseClaimsJws(token);
+            return true;
+        }catch (SignatureException e){
+            return false;
+        }
+    }
+
     private byte[] generateKey(){
         byte[] key = null;
         try {
@@ -36,7 +45,12 @@ public class JwtServiceImpl implements JwtService{
     }
 
     @Override
-    public Map<String, Object> get(String key) {
-        return null;
+    public Map<String, Object> get(String key,String token) {
+        try {
+            Jws<Claims> jws = Jwts.parser().setSigningKey(this.generateKey()).parseClaimsJws(token);
+            return (Map<String, Object>) jws.getBody().get(key);
+        }catch (SignatureException e){
+            return null;
+        }
     }
 }

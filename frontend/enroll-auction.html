@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&amp;subset=korean"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <link rel="stylesheet" type="text/css" href="./css/enroll-auction.css">
+
+</head>
+
+<body>>
+    <div id="header">
+        <div class="header-content">
+            <a href="#" class="menu-icon-href">
+                <i class="fas fa-bars menu-icon"></i>
+            </a>
+            <a href="#" class="add-auction-icon-href">
+                <i class="fas fa-plus-circle add-auction-icon"></i>
+            </a>
+            <input type="text" class="search_input" placeholder="Search Item">
+            <a href="#" class="user-icon-href">
+                <img src="./images/user.svg" class="user-icon">
+            </a>
+        </div>
+    </div>
+
+    <div id="content">
+        <div class="product-container">
+            <div class="enroll-container">
+                <div class="detail-image-section">
+                    <div class="detail-image">
+                        <img src="./images/product_1.jpg" class="detail-img">
+                    </div>
+                    <div class="detail-preview-images">
+                        <!--                    <div class="prev-arrow"><span><i class="fas fa-chevron-left"></i></span></div>-->
+                        <!--                    <div class="next-arrow"><span><i class="fas fa-chevron-right"></i></span></div>-->
+                        <ul class="preview-image-list">
+                            <li><img src="./images/product_1.jpg"></li>
+                            <li><img src="./images/product_3.jpg"></li>
+                            <li><img src="./images/product_4.jpg"></li>
+                            <li><img src="./images/product_5.jpg"></li>
+                            <li><img src="./images/product_6.jpg"></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="detail-product-section">
+                    <div class="detail-title">
+                        제품 이름 : &nbsp;
+                        <input type="text" class="title-input">
+                    </div>
+                    <div class="detail-category">
+                        <ul class="detail-category-list">
+                            <li>
+                                <a class="category">경매 종류</a>
+                            </li>
+                            <li>
+                                <a class="category basic-auction-button">일반 경매</a>
+                            </li>
+                            <li>
+                                <a class="category live-auction-button">실시간 경매</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="detail-price">
+                            <span class="lower-price-text">
+                                    경매 종류 : &nbsp;
+                                <input type="text" class="auction-type" value = "일반 경매" readonly >
+                                
+                            </span>
+                        </div>
+                    <div class="detail-time">
+                        <i class="far fa-clock">경매 기간</i>
+                        <!--
+                        <div class="start-time">
+                            시작 날짜/시간 :
+                            <input type="datetime-local" class="start-input">
+                        </div>
+                        <div class="end-time">
+                            종료 날짜/시간 :
+                            <input type="datetime-local" class="end-input">
+                        </div>
+                        -->
+                        <div class="going-time">
+                                기간 :
+                                <input type="number" class="going-input">
+                                분
+                        </div>
+                    </div>
+                    <div class="detail-price">
+                        <span class="lower-price-text">
+                            경매 시작 가격 : &nbsp;
+                            <input type="text" class="lower-price-input">
+                            원
+                        </span>
+                    </div>
+                    <div class="detail-price">
+                        <span class="upper-price-text">
+                            즉시 구매 가격 : &nbsp;
+                            <input type="text" class="upper-price-input">
+                            원
+                        </span>
+                    </div>
+
+                    <div class="detail-description">
+                        상품 설명란
+                        <textarea class="spec-input"></textarea>
+                    </div>
+                </div>
+            </div>
+            <a id="enroll-submit" href="#">
+                <span class="make-auction-button">등록하기</span>
+            </a>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="./js/main.js"></script>
+    <script src="./js/enroll-auction.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-.register-container {
+.enroll-container {
     width: 100%;
     height: 600px;
     margin:0 auto;
@@ -7,12 +7,12 @@
     justify-content: center;
 }
 
-.register-container .detail-image-section{
+.enroll-container .detail-image-section{
     width: 45%;
     height: 100%;
 }
 
-.register-container .detail-image-section .detail-image{
+.enroll-container .detail-image-section .detail-image{
     width: calc(100% - 100px);
     height: 70%;
     padding: 40px 50px 20px 50px;
@@ -20,12 +20,12 @@
     align-items: center;
 }
 
-.register-container .detail-image-section .detail-image .detail-img {
+.enroll-container .detail-image-section .detail-image .detail-img {
     width: 100%;
     max-height: 100%;
 }
 
-.register-container .detail-image-section .detail-preview-images{
+.enroll-container .detail-image-section .detail-preview-images{
     width: calc(100% - 100px);
     height: 120px;
     display: flex;
@@ -34,19 +34,19 @@
     position: relative;
 }
 
-.register-container .detail-image-section .detail-preview-images .prev-arrow{
+.enroll-container .detail-image-section .detail-preview-images .prev-arrow{
     position: absolute;
     width: 50px;
     height: 120px;
     left: 0;
     text-align: center;
 }
-.register-container .detail-image-section .detail-preview-images span{
+.enroll-container .detail-image-section .detail-preview-images span{
     height: 120px;
     line-height: 120px;
     color: #222222;
 }
-.register-container .detail-image-section .detail-preview-images .next-arrow{
+.enroll-container .detail-image-section .detail-preview-images .next-arrow{
     position: absolute;
     width: 50px;
     height: 120px;
@@ -54,14 +54,14 @@
     text-align: center;
 }
 
-.register-container .detail-image-section .detail-preview-images .preview-image-list{
+.enroll-container .detail-image-section .detail-preview-images .preview-image-list{
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
 }
 
-.register-container .detail-image-section .detail-preview-images .preview-image-list li{
+.enroll-container .detail-image-section .detail-preview-images .preview-image-list li{
     width: 80px;
     height: 80px;
     border-radius: 10px;
@@ -70,12 +70,12 @@
     overflow: hidden;
 }
 
-.register-container .detail-image-section .detail-preview-images li img{
+.enroll-container .detail-image-section .detail-preview-images li img{
     width: 100%;
     height: 100%;
 }
 
-.register-container .detail-product-section{
+.enroll-container .detail-product-section{
     width: 40%;
     height: 100%;
 
@@ -86,7 +86,7 @@
     padding-left: 30px;
 }
 
-.register-container input{
+.enroll-container input{
     width: 300px;
     height: 35px;
     border: solid 1px #4a4a4a;
@@ -103,11 +103,11 @@
     -o-transition: all 200ms ease;
     transition: all 200ms ease;
 }
-.register-container input[type=text]:focus {
+.enroll-container input[type=text]:focus {
     border: solid 1px #2fce98;
 }
 
-.register-container .detail-product-section .detail-title {
+.enroll-container .detail-product-section .detail-title {
     font-size: 28px;
     color: #4a4a4a;
     font-weight: 500;
@@ -116,27 +116,27 @@
     align-items: center;
 }
 
-.register-container .detail-product-section .detail-title input{
+.enroll-container .detail-product-section .detail-title input{
     width: 250px;
 }
 
-.register-container .detail-product-section .detail-category {
+.enroll-container .detail-product-section .detail-category {
     width: 100%;
-
 }
 
-.register-container .detail-product-section .detail-category .category-list{
+.enroll-container .detail-product-section .detail-category .detail-category-list {
     width: 100%;
     margin-top: 20px;
     display: flex;
     flex-direction: row;
     flex-wrap : wrap;
 }
-.register-container .detail-product-section .detail-category .category-list li{
+
+.enroll-container .detail-product-section .detail-category .detail-category-list li {
     margin-top: 10px;
 }
 
-.register-container .detail-product-section .detail-category .category-list .category{
+.enroll-container .detail-product-section .detail-category .detail-category-list .category {
     /*display: block;*/
     padding: 5px;
     height: 30px;
@@ -149,33 +149,33 @@
     color: white;
 }
 
-.register-container .detail-product-section .detail-category .category-list .category:hover{
+.enroll-container .detail-product-section .detail-category .detail-category-list .category:hover{
     background-color: #2fce98;
 }
 
-.register-container .detail-product-section .detail-time {
+.enroll-container .detail-product-section .detail-time {
     padding-top: 36px;
     font-size: 16px;
     color: #4a4a4a;
     font-weight: 500;
 }
 
-.register-container .detail-product-section .detail-time i{
+.enroll-container .detail-product-section .detail-time i{
     font-size: 20px;
     font-weight: 600;
 }
 
-.register-container .detail-product-section .detail-time div{
+.enroll-container .detail-product-section .detail-time div{
     margin-top: 8px;
 }
 
-.register-container .detail-product-section .detail-time input[type=datetime-local] {
+.enroll-container .detail-product-section .detail-time input[type=datetime-local] {
     margin-left: 15px;
     width: 280px;
     text-align: center;
 }
 
-.register-container .detail-product-section .detail-price {
+.enroll-container .detail-product-section .detail-price {
     display: flex;
     align-items: center;
     height: 50px;
@@ -185,11 +185,11 @@
     font-weight: 500;
 }
 
-.register-container .detail-product-section .detail-price input{
+.enroll-container .detail-product-section .detail-price input{
     width: 180px;
 }
 
-.register-container .detail-product-section .detail-description {
+.enroll-container .detail-product-section .detail-description {
     padding-top: 35px;
     width: 85%;
     font-size: 16px;
@@ -198,7 +198,7 @@
     font-weight: 500;
 }
 
-.register-container .detail-product-section .detail-description textarea{
+.enroll-container .detail-product-section .detail-description textarea{
     margin-top: 10px;
     resize: none;
     width: 100%;
@@ -208,6 +208,19 @@
 
 }
 
-.register-container .detail-product-section .detail-description textarea:focus{
+.enroll-container .detail-product-section .detail-description textarea:focus{
     outline: none !important;
+}
+
+#content .make-auction-button {
+    margin-top: 30px;
+    display: block;
+    width: 130px;
+    height: 50px;
+    background-color: #2fce98;
+    line-height: 50px;
+    color: #FFFFFF;
+    text-align: center;
+    font-weight: 500;
+    box-shadow: 0px 5px 5px rgba(0,0,0,0.28);
 }
