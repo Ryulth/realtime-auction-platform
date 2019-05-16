@@ -1,6 +1,7 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
 const auctionId = location.href.substr(location.href.lastIndexOf('?') + 1)
+let auctionStatus = "ongoing";
 let userId;
 let auctionType;
 let clientVersion = 0;
@@ -44,8 +45,11 @@ function connect() {
 }
 
 function receiveAuctionEvent(auctionEvents) {
-    $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents));
-    $(".detail-enroll-person-data")[0].innerText = auctionEvents[auctionEvents.length - 1].nickName + " (" + auctionEvents[auctionEvents.length - 1].eventTime + ")";
+    setAuctionStatus(auctionEvents);
+    let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType == "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
+    $(".current-price")[0].innerText = comma(getCurrentPrice(auctionEvents,lastIndex));
+    setBiddingPrice();
+    $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
     clientVersion = auctionEvents[auctionEvents.length - 1].version;
     if (auctionEvents.length === 1 & userId === auctionEvents[auctionEvents.length - 1].userId) {
         showBidResult(true);
@@ -55,9 +59,9 @@ function receiveAuctionEvent(auctionEvents) {
         showBidResult(false);
     }
 }
-function getCurrentPrice(auctionEvents) {
+function getCurrentPrice(auctionEvents,lastIndex) {
     if (auctionType == "basic") {
-        return auctionEvents[auctionEvents.length - 1].price;
+        return auctionEvents[lastIndex].price;
     } else if (auctionType == "live") {
         if(auctionEvents.length===1){
             return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
@@ -108,17 +112,19 @@ function getAuction() {
             request.setRequestHeader("Authorization", jwtToken);
         },
         success: function (response) {
-            console.log(response)
             userId = response.userId;
-            console.log(userId);
             auctionType = response.auction.auctionType;
+            setAuctionType();
             let auctionEvents = response.auctionEvents;
+            let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType === "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
             clientVersion = auctionEvents[auctionEvents.length-1].version;
+            setAuctionStatus(auctionEvents);
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
-            $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents));
-            $(".detail-enroll-person-data")[0].innerText = auctionEvents[auctionEvents.length - 1].nickName + " (" + auctionEvents[auctionEvents.length - 1].eventTime + ")";
+            $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents,lastIndex));
+            setBiddingPrice();
+            $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
             $(".detail-description")[0].innerText = response.product.spec;
         },
         error: function (response) {
@@ -126,7 +132,27 @@ function getAuction() {
         }
     });
 }
-
+function setAuctionType(){
+    if(auctionType =="basic"){
+        $(".auction-type")[0].innerText = "일반 경매";
+    }else{
+        $(".auction-type")[0].innerText = "실시간 경매";
+        $(".price-input").prop("readonly", true);
+        
+    }
+}
+function setBiddingPrice(){
+    let biddingPrice = parseInt(parseInt(uncomma($(".current-price")[0].innerText))/10);
+    console.log(biddingPrice);
+    $(".price-input").val(biddingPrice)
+}
+function setAuctionStatus(auctionEvents){
+    if(auctionEvents[auctionEvents.length-1].auctionEventType === "CLOSE"){
+        $(".auction-status").removeClass("status-ongoing");
+        $(".auction-status").addClass("status-close");
+        $(".auction-status")[0].innerText = "경매 종료";
+    }
+}
 
 function showBidResult(success) {
     if (success) {
@@ -150,4 +176,8 @@ function uncomma(str) {
 
 function numberFormat(obj) {
     obj.value = comma(uncomma(obj.value));
+}
+
+function setBiddingTable(auctionEvents){
+    
 }

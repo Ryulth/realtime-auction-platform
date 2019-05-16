@@ -41,7 +41,9 @@ public class AuctionEventServiceImpl implements AuctionEventService {
         AuctionEvent lastAuctionEvent = auctionEvents.get(auctionEvents.size() - 1);
         ValueOperations vop = redisTemplate.opsForValue();
         boolean onGoing = (boolean) vop.get(AUCTION_ONGOING_REDIS + auctionId);
-        if (lastAuctionEvent.getPrice() < auctionEventRequest.getPrice() && onGoing) {
+        System.out.println("dhsrhfhasfklasnflknfklanlsfnlfaklsfakfsaln");
+        System.out.println(onGoing);
+        if (onGoing &&lastAuctionEvent.getPrice() < auctionEventRequest.getPrice() ) {
             long newPrice = auctionEventRequest.getPrice();
             long newVersion = lastAuctionEvent.getVersion() + 1;
             AuctionEvent newAuctionEvent = AuctionEvent.builder()

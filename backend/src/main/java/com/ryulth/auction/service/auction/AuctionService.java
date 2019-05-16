@@ -1,6 +1,7 @@
 package com.ryulth.auction.service.auction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.User;
 import com.ryulth.auction.pojo.request.AuctionEnrollRequest;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
@@ -14,7 +15,7 @@ import java.io.IOException;
 
 @Service
 public interface AuctionService {
-    Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) throws IOException;
+    Auction enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) throws IOException;
 
     AuctionListResponse getAllAuctions() throws JsonProcessingException;
 

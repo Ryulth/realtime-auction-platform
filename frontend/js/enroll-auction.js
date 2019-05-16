@@ -1,6 +1,5 @@
 const jwtToken = window.localStorage.getItem("com.ryulth.auction.account");
 const baseUrl = "http://localhost:8080";
-let auctionType= "basic";
 $(document).ready(function () {
     if (jwtToken == null) {
         let popUrl = `naverlogin.html`;
@@ -73,7 +72,8 @@ function enrollAuction(productId) {
         dataType: 'json',
         success: function (response) {
             console.log(response);
-            alert("등록 완료")
+            let auctionId = response.id;
+            window.open(`http://127.0.0.1:5500/bid-page.html?${auctionId}`, "_blank");
             window.location.reload();
         }
     });

@@ -59,10 +59,10 @@ public class AuctionServiceImpl implements AuctionService {
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
 
     @Override
-    public Long enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) {
+    public Auction enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) {
         AuctionType auctionType = auctionEnrollRequest.getAuctionTypeEnum();
         if (auctionType == AuctionType.ERROR) {
-            return -1L;
+            return null;
         }
         ValueOperations vop = redisTemplate.opsForValue();
         long productId = auctionEnrollRequest.getProductId();
@@ -104,7 +104,7 @@ public class AuctionServiceImpl implements AuctionService {
 
         vop.set(AUCTION_TYPE_REDIS + auctionId, auctionType.getValue());
 
-        return auctionId;
+        return auction;
     }
 
     @Override
@@ -170,7 +170,7 @@ public class AuctionServiceImpl implements AuctionService {
                     .userId(a.getUserId())
                     .nickName("Finish")
                     .auctionEventType(AuctionEventType.CLOSE)
-                    .version(Long.MAX_VALUE) // 구백 이십경 ...
+                    .version(9000000000000000000L) // 구백 이십경 ...
                     .price(0L)
                     .eventTime(ZonedDateTime.now(zoneId))
                     .build();
