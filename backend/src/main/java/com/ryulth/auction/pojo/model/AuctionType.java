@@ -5,6 +5,7 @@ import java.util.Arrays;
 public enum  AuctionType {
     BASIC("basic"), // 비딩 방식
     LIVE("live"), // 경쟁 방식
+    FIRSTCOME("firstcome"), //선착순 방식
     ERROR("error");
 
     private final String value;

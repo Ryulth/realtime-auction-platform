@@ -26,6 +26,9 @@ public class Auction {
     private Long userId;
 
     @Column
+    private Long buyerId;
+
+    @Column
     private Long productId;
 
     @Column

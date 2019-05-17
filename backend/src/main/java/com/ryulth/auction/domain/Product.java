@@ -10,7 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -31,6 +30,9 @@ public class Product {
     @Column
     private String name;
 
+    @Column
+    private Long count;
+
     @Lob
     @Column(nullable = true)
     private String spec;
@@ -50,6 +52,7 @@ public class Product {
 
     @PrePersist
     void setUp(){
+        this.count = 10L;
         this.onSale = 1 ;
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
         this.createTime = ZonedDateTime.now(seoulZoneId);

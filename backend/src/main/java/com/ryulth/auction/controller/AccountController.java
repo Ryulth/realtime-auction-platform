@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class AccountController {
     private static Logger logger = LoggerFactory.getLogger(AccountController.class);
-    @Autowired
-    AccountService accountService;
+    private final AccountService accountService;
     private static final HttpHeaders httpHeaders = new HttpHeaders();
+
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @CrossOrigin("*")
     @PostMapping("/signin")

@@ -5,6 +5,7 @@ let userId;
 let auctionType;
 let clientVersion = 0;
 let stompClient;
+let maxCount;
 getAuction();
 
 $(document).ready(function () {
@@ -31,7 +32,6 @@ function connect() {
     stompClient.connect({}, function (frame) {
         console.log("connect");
         stompClient.subscribe(`/topic/auctions/${auctionId}/event`, function (response) {
-            console.log("wevsocket")
             let responseBody = JSON.parse(response.body);
             console.log(responseBody);
             receiveAuctionEvent(responseBody.auctionEvents);
@@ -59,23 +59,6 @@ function receiveAuctionEvent(auctionEvents) {
         showBidResult(false);
     } else {
         showBidResult(false);
-    }
-}
-
-function getCurrentPrice(auctionEvents, lastIndex) {
-    if (auctionType == "basic") {
-        return auctionEvents[lastIndex].price;
-    } else if (auctionType == "live") {
-        if (auctionEvents.length === 1) {
-            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
-        }
-        let sum = 0;
-        auctionEvents.forEach(function (item, idex, array) {
-            sum += item.price;
-        });
-        return sum;
-    } else {
-        return -1;
     }
 }
 
@@ -115,9 +98,14 @@ function getAuction() {
             request.setRequestHeader("Authorization", jwtToken);
         },
         success: function (response) {
+            console.log(response);
             userId = response.userId;
             auctionType = response.auction.auctionType;
             setAuctionType();
+            if(auctionType === "firstcome"){
+                $(".current-price")[0].innerText = response.product.count;
+                maxCount = response.product.count;
+            }
             let auctionEvents = response.auctionEvents;
             let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType === "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
             clientVersion = auctionEvents[auctionEvents.length - 1].version;
@@ -125,28 +113,60 @@ function getAuction() {
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
+
             if (lastIndex !== -1) {
                 $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
             }
             setBiddingPrice();
-            $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
+            $(".detail-enroll-person-data")[0].innerText = 
+                `${auctionEvents[lastIndex].nickName} ( ${(new Date(auctionEvents[lastIndex].eventTime)).format('yyyy-MM-dd(KS) HH:mm:ss')} )`;
             $(".detail-description")[0].innerText = response.product.spec;
             setBiddingTable(auctionEvents);
         },
         error: function (response) {
-            alert("error");
+        
         }
     });
+}
+
+function getCurrentPrice(auctionEvents, lastIndex ) {
+    if (auctionType == "basic") {
+        return auctionEvents[lastIndex].price;
+    } else if (auctionType == "live") {
+        if (auctionEvents.length === 1) {
+            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
+        }
+        let sum = 0;
+        auctionEvents.forEach(function (item, idex, array) {
+            sum += item.price;
+        });
+        return sum;
+    } else if(auctionType === "firstcome"){
+        if(auctionEvents.length == 1 && auctionEvents[0].auctionEventType == "BID"){
+            return parseInt(uncomma($(".current-price")[0].innerText)) -1;
+        }
+        let cnt = maxCount;
+        auctionEvents.forEach(function (item, idex, array) {
+            if(item.auctionEventType === "BID"){
+                cnt --;
+            }
+        });
+        return cnt;
+    }
 }
 
 function setAuctionType() {
     if (auctionType == "basic") {
         $(".auction-type")[0].innerText = "일반 경매";
-    } else {
+    } else if(auctionType == "live"){
         $(".auction-type")[0].innerText = "실시간 경매";
         $(".price-input").prop("readonly", true);
-
+    } else if(auctionType == "firstcome"){
+        $(".auction-type")[0].innerText = "선착순 경매";
+        $(".current-price-text")[0].innerText = "현재수량: "
+        $(".price-input").prop("readonly", true);
     }
+
 }
 
 function setBiddingPrice() {
@@ -196,11 +216,12 @@ function setBiddingTable(auctionEvents) {
         $("#bid-history-body").empty();
     }
     auctionEvents.forEach(function (item, idex, array) {
-        if (item.auctionEventType !== "CLOSE") {
+        if (item.auctionEventType !== "CLOSE" && item.auctionEventType !== "ENROLL") {
+            let itemPrice = (auctionType === "live") ? "+ " +comma(item.price) : comma(item.price);
             let newRow = `<tr>     
             <td>${item.nickName}</td>
-            <td>${item.eventTime}</td>
-            <td>${comma(item.price)}</td>
+            <td>${(new Date(item.eventTime)).format('yyyy-MM-dd(KS) HH:mm:ss')}</td>
+            <td>${itemPrice}</td>
             </tr>`;
             $("#bid-history-body").prepend(newRow);
         }

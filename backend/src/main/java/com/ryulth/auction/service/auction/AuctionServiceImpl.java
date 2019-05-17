@@ -3,6 +3,7 @@ package com.ryulth.auction.service.auction;
 import com.ryulth.auction.domain.Auction;
 import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.domain.User;
+import com.ryulth.auction.pojo.model.AuctionData;
 import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.model.AuctionEventType;
 import com.ryulth.auction.pojo.model.AuctionType;
@@ -13,6 +14,7 @@ import com.ryulth.auction.pojo.response.AuctionEventsResponse;
 import com.ryulth.auction.pojo.response.AuctionListResponse;
 import com.ryulth.auction.repository.AuctionRepository;
 import com.ryulth.auction.repository.ProductRepository;
+import com.ryulth.auction.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +43,11 @@ import java.util.stream.Collectors;
 @Primary
 public class AuctionServiceImpl implements AuctionService {
     private static Logger logger = LoggerFactory.getLogger(AuctionServiceImpl.class);
-    @Autowired
-    AuctionRepository auctionRepository;
-    @Autowired
-    ProductRepository productRepository;
-    @Autowired
-    RedisTemplate redisTemplate;
-    @Autowired
-    AuctionEventService auctionEventService;
-    @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
+    private final AuctionRepository auctionRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final RedisTemplate redisTemplate;
+    private final AuctionEventService auctionEventService;
 
     private static final ZoneId zoneId = ZoneId.of("Asia/Seoul");
     private static final String timePattern = "yyyy-MM-dd HH:mm";
@@ -58,6 +55,15 @@ public class AuctionServiceImpl implements AuctionService {
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
+
+    @Autowired
+    public AuctionServiceImpl(AuctionRepository auctionRepository, ProductRepository productRepository, UserRepository userRepository, RedisTemplate redisTemplate, AuctionEventService auctionEventService) {
+        this.auctionRepository = auctionRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.redisTemplate = redisTemplate;
+        this.auctionEventService = auctionEventService;
+    }
 
     @Override
     public Auction enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) {
@@ -72,8 +78,6 @@ public class AuctionServiceImpl implements AuctionService {
         product.setOnSale(1);
         productRepository.save(product);
         ZonedDateTime now = ZonedDateTime.now(zoneId);
-        System.out.println(now.plusMinutes(auctionEnrollRequest.getGoingTime()));
-        System.out.println(auctionEnrollRequest.getGoingTime());
         Auction auction = auctionRepository.findByProductId(productId)
                 .orElse(Auction.builder()
                         .userId(user.getId())
@@ -85,7 +89,7 @@ public class AuctionServiceImpl implements AuctionService {
                         .version(0L)
                         .build());
         auctionRepository.save(auction);
-
+        System.out.println(auction);
         long auctionId = auction.getId();
         AuctionEvent auctionEvent = AuctionEvent.builder()
                 .userId(user.getId())
@@ -111,7 +115,18 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionListResponse getAllAuctions() {
         List<Auction> auctions = auctionRepository.findAll();
-        return AuctionListResponse.builder().auctions(auctions).build();
+        List<AuctionData> auctionData = new ArrayList<>();
+
+        for (Auction auction : auctions) {
+            User user = userRepository.getOne(auction.getUserId());
+            Product product = productRepository.getOne(auction.getProductId());
+            auctionData.add(AuctionData.builder()
+                    .auctionId(auction.getId())
+                    .nickName(user.getNickName())
+                    .product(product)
+                    .build());
+        }
+        return AuctionListResponse.builder().auctions(auctionData).build();
     }
 
     @Override
@@ -144,6 +159,10 @@ public class AuctionServiceImpl implements AuctionService {
                 return auctionEventService.basicAuctionEvent(auctionId, auctionEventRequest, user);
             case LIVE:
                 return auctionEventService.liveAuctionEvent(auctionId, auctionEventRequest, user);
+            case FIRSTCOME:
+                Auction auction = auctionRepository.getOne(auctionId);
+                Product product = productRepository.getOne(auction.getProductId());
+                return auctionEventService.firstComeAuctionEvent(auction,auctionEventRequest,user,product);
             case ERROR:
             default:
                 return null;
@@ -166,28 +185,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(a);
             ValueOperations vop = redisTemplate.opsForValue();
             vop.set(AUCTION_ONGOING_REDIS + a.getId(), false);
-
-
-            AuctionEvent closeEvent = AuctionEvent.builder()
-                    .userId(a.getUserId())
-                    .nickName("Finish")
-                    .auctionEventType(AuctionEventType.CLOSE)
-                    .version(9000000000000000000L) // 구백 이십경 ...
-                    .price(0L)
-                    .eventTime(ZonedDateTime.now(zoneId))
-                    .build();
-            try {
-                xAdd(AUCTION_EVENTS_REDIS + a.getId(), a.getId() + "-" + Long.MAX_VALUE, closeEvent);
-                List<AuctionEvent> auctionEvents = new ArrayList<>();
-                auctionEvents.add(closeEvent);
-                this.simpMessagingTemplate.convertAndSend("/topic/auctions/" + a.getId() + "/event",
-                        AuctionEventsResponse.builder()
-                                .auctionEvents(auctionEvents)
-                                .auctionType(a.getAuctionType())
-                                .build()
-                );
-            } catch (RedisSystemException ignore) {
-            }
+            auctionEventService.endEvents(a);
 
         });
 

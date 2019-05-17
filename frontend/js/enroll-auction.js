@@ -19,6 +19,10 @@ $(document).ready(function () {
         $auctionTypeInput.val("실시간 경매")
         auctionType= "live";
     })
+    $(".fcfs-auction-button").on("click" ,function(e){
+        $auctionTypeInput.val("선착순 경매")
+        auctionType= "firstcome";
+    })
     
 });
 
