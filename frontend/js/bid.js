@@ -124,7 +124,7 @@ function getAuction() {
             setBiddingTable(auctionEvents);
         },
         error: function (response) {
-            alert("error");
+        
         }
     });
 }
