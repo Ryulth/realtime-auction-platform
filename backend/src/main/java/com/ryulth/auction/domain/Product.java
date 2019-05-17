@@ -52,6 +52,7 @@ public class Product {
 
     @PrePersist
     void setUp(){
+        this.count = 10L;
         this.onSale = 1 ;
         ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
         this.createTime = ZonedDateTime.now(seoulZoneId);

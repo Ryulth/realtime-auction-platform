@@ -126,7 +126,11 @@ public class AuctionEventServiceImpl implements AuctionEventService {
     public AuctionEventsResponse firstComeAuctionEvent(Auction auction, AuctionEventRequest auctionEventRequest, User user , Product product) {
         ValueOperations vop = redisTemplate.opsForValue();
         long auctionId = auction.getId();
-
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         boolean onGoing = (boolean) vop.get(AUCTION_ONGOING_REDIS + auctionId);
         long clientVersion = auctionEventRequest.getVersion();
         if (onGoing) {
@@ -139,6 +143,11 @@ public class AuctionEventServiceImpl implements AuctionEventService {
                     .nickName(user.getNickName())
                     .eventTime(ZonedDateTime.now(zoneId))
                     .build();
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while (true) {
                 try {
                     xAdd(AUCTION_EVENTS_REDIS + auctionId, auctionId + "-" + newAuctionEvent.getVersion(), newAuctionEvent);

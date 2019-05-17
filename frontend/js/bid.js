@@ -5,6 +5,7 @@ let userId;
 let auctionType;
 let clientVersion = 0;
 let stompClient;
+let maxCount;
 getAuction();
 
 $(document).ready(function () {
@@ -61,23 +62,6 @@ function receiveAuctionEvent(auctionEvents) {
     }
 }
 
-function getCurrentPrice(auctionEvents, lastIndex) {
-    if (auctionType == "basic") {
-        return auctionEvents[lastIndex].price;
-    } else if (auctionType == "live") {
-        if (auctionEvents.length === 1) {
-            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
-        }
-        let sum = 0;
-        auctionEvents.forEach(function (item, idex, array) {
-            sum += item.price;
-        });
-        return sum;
-    } else {
-        return -1;
-    }
-}
-
 function bidAction() {
     $inputPrice = $(".price-input");
     let inputPriceValue = uncomma($inputPrice.val());
@@ -114,9 +98,14 @@ function getAuction() {
             request.setRequestHeader("Authorization", jwtToken);
         },
         success: function (response) {
+            console.log(response);
             userId = response.userId;
             auctionType = response.auction.auctionType;
             setAuctionType();
+            if(auctionType === "firstcome"){
+                $(".current-price")[0].innerText = response.product.count;
+                maxCount = response.product.count;
+            }
             let auctionEvents = response.auctionEvents;
             let lastIndex = (auctionEvents[auctionEvents.length - 1].auctionEventType === "CLOSE") ? auctionEvents.length - 2 : auctionEvents.length - 1;
             clientVersion = auctionEvents[auctionEvents.length - 1].version;
@@ -140,14 +129,44 @@ function getAuction() {
     });
 }
 
+function getCurrentPrice(auctionEvents, lastIndex ) {
+    if (auctionType == "basic") {
+        return auctionEvents[lastIndex].price;
+    } else if (auctionType == "live") {
+        if (auctionEvents.length === 1) {
+            return parseInt(uncomma($(".current-price")[0].innerText)) + auctionEvents[0].price;
+        }
+        let sum = 0;
+        auctionEvents.forEach(function (item, idex, array) {
+            sum += item.price;
+        });
+        return sum;
+    } else if(auctionType === "firstcome"){
+        if(auctionEvents.length == 1 && auctionEvents[0].auctionEventType == "BID"){
+            return parseInt(uncomma($(".current-price")[0].innerText)) -1;
+        }
+        let cnt = maxCount;
+        auctionEvents.forEach(function (item, idex, array) {
+            if(item.auctionEventType === "BID"){
+                cnt --;
+            }
+        });
+        return cnt;
+    }
+}
+
 function setAuctionType() {
     if (auctionType == "basic") {
         $(".auction-type")[0].innerText = "일반 경매";
-    } else {
+    } else if(auctionType == "live"){
         $(".auction-type")[0].innerText = "실시간 경매";
         $(".price-input").prop("readonly", true);
-
+    } else if(auctionType == "firstcome"){
+        $(".auction-type")[0].innerText = "선착순 경매";
+        $(".current-price-text")[0].innerText = "현재수량: "
+        $(".price-input").prop("readonly", true);
     }
+
 }
 
 function setBiddingPrice() {
@@ -197,7 +216,7 @@ function setBiddingTable(auctionEvents) {
         $("#bid-history-body").empty();
     }
     auctionEvents.forEach(function (item, idex, array) {
-        if (item.auctionEventType !== "CLOSE") {
+        if (item.auctionEventType !== "CLOSE" && item.auctionEventType !== "ENROLL") {
             let itemPrice = (auctionType === "live") ? "+ " +comma(item.price) : comma(item.price);
             let newRow = `<tr>     
             <td>${item.nickName}</td>
