@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <script type="text/javascript" src="https://static.nid.naver.com/js/naverLogin_implicit-1.0.3.js" charset="utf-8">
+  </script>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+
+<body>
+  <script type="text/javascript">
+    var naver_id_login = new naver_id_login("h5fUcUuj0MJ8P0GMhitM", "http://127.0.0.1:5500/callback.html");
+    naver_id_login.get_naver_userprofile("naverSignInCallback()");
+    function naverSignInCallback() {
+      let reqBody = {
+        "naverId" : naver_id_login.getProfileData('id'),
+        "email": naver_id_login.getProfileData('email'),
+        "nickName": naver_id_login.getProfileData('nickname')
+      }      
+        let sendUrl = "http://127.0.0.1:8080/signin";
+        $.ajax({
+          async: true, // false 일 경우 동기 요청으로 변경
+          type: "POST",
+          contentType: "application/json",
+          url: sendUrl,
+          data: JSON.stringify(reqBody),
+          dataType: 'json',
+          success: function (response) {
+            let jwtToken = response.jwtToken;
+            window.localStorage.setItem("com.ryulth.auction.account", jwtToken);
+            self.close();
+          },
+          error: function (response) {
+            console.log("Error")
+          }
+        });
+    }
+  </script>
+</body>
+
+</html>

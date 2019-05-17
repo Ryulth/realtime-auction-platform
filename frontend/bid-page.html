@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400,500,700&amp;subset=korean"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <link rel="stylesheet" type="text/css" href="./css/bid-page.css">
+</head>
+
+<body>>
+    <div id="header">
+        <div class="header-content">
+            <a href="#" class="menu-icon-href">
+                <i class="fas fa-bars menu-icon"></i>
+            </a>
+            <a href="#" class="add-auction-icon-href">
+                <i class="fas fa-plus-circle add-auction-icon"></i>
+            </a>
+            <input type="text" class="search_input" placeholder="Search Item">
+            <a href="#" class="user-icon-href">
+                <img src="./images/user.svg" class="user-icon">
+            </a>
+        </div>
+    </div>
+
+    <div id="content">
+        <div class="product-container">
+            <div class="detail-container">
+                <div class="detail-image-section">
+                    <div class="detail-image">
+                        <img src="./images/product_1.jpg" class="detail-img">
+                    </div>
+                    <div class="detail-preview-images">
+                        <!--                    <div class="prev-arrow"><span><i class="fas fa-chevron-left"></i></span></div>-->
+                        <!--                    <div class="next-arrow"><span><i class="fas fa-chevron-right"></i></span></div>-->
+                        <ul class="preview-image-list">
+                            <li><img src="./images/product_1.jpg"></li>
+                            <li><img src="./images/product_3.jpg"></li>
+                            <li><img src="./images/product_4.jpg"></li>
+                            <li><img src="./images/product_5.jpg"></li>
+                            <li><img src="./images/product_6.jpg"></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="detail-product-section">
+                    <div class="auction-type"></div>
+                    <div class="auction-status status-ongoing">경매 진행 중</div>
+                    <div class="detail-title"></div>
+                    <div class="detail-category">Category</div>
+                    <div class="detail-time">
+                        <i class="far fa-clock"></i>
+                        <span class="start-time"></span>
+                        <!-- 진행중인거에만 ongoing class 추가-->
+                        <span class="end-time ongoing"></span>
+                    </div>
+                    <div class="detail-price">
+                        <!-- 진행중인 경매면 current-price-text 에 now-status 추가하고 -->
+                        <span class="current-price-text now-status">현재 가격 :</span>
+                        <!-- 완료된 경매면 success-price-text 에 now-status 추가하기 -->
+                        <span class="success-price-text">최종 낙찰 가격 :</span>
+                        <span class="current-price">0</span>
+                    </div>
+
+                    <div class="detail-enroll-person">현재 입찰자 : <span class="detail-enroll-person-data"></span></div>
+
+                    <div class="detail-price-input">
+                        <input type="text" class="price-input" placeholder="입찰을 원하시는 금액을 입력해주세요">
+                        <a id="price-submit"><span class="price-submit-deco">입찰하기</span></a>
+                    </div>
+                    <div id="detail-bid-success" class="detail-bid-success bid-status">정상적으로 입찰되었습니다!</div>
+                    <div id="detail-bid-fail" class="detail-bid-fail ">입찰 실패!</div>
+
+                    <div class="detail-description">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bid-history-container">
+                <div class="bid-history-text">
+                    <i class="fas fa-history" style="font-size: 25px;"></i>
+                    입찰 기록
+                </div>
+                <table class="bid-history-table">
+                    <thead>
+                        <tr>
+                            <th>닉네임</th>
+                            <th>낙찰 시간</th>
+                            <th>입찰 금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id = "bid-history-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="./js/main.js"></script>
+    <script type="text/javascript" src="./js/sockjs.min.js"></script>
+    <script type="text/javascript" src="./js/stomp.min.js"></script>
+    <script type="text/javascript" src="./js/bid.js"></script>
+</body>
+
+</html>
