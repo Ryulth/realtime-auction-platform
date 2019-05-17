@@ -31,7 +31,6 @@ function connect() {
     stompClient.connect({}, function (frame) {
         console.log("connect");
         stompClient.subscribe(`/topic/auctions/${auctionId}/event`, function (response) {
-            console.log("wevsocket")
             let responseBody = JSON.parse(response.body);
             console.log(responseBody);
             receiveAuctionEvent(responseBody.auctionEvents);
@@ -129,7 +128,8 @@ function getAuction() {
                 $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
             }
             setBiddingPrice();
-            $(".detail-enroll-person-data")[0].innerText = auctionEvents[lastIndex].nickName + " (" + auctionEvents[lastIndex].eventTime + ")";
+            $(".detail-enroll-person-data")[0].innerText = 
+                `${auctionEvents[lastIndex].nickName} ( ${(new Date(auctionEvents[lastIndex].eventTime)).format('yyyy-MM-dd(KS) HH:mm:ss')} )`;
             $(".detail-description")[0].innerText = response.product.spec;
             setBiddingTable(auctionEvents);
         },
@@ -199,7 +199,7 @@ function setBiddingTable(auctionEvents) {
         if (item.auctionEventType !== "CLOSE") {
             let newRow = `<tr>     
             <td>${item.nickName}</td>
-            <td>${item.eventTime}</td>
+            <td>${(new Date(item.eventTime)).format('yyyy-MM-dd(KS) HH:mm:ss')}</td>
             <td>${comma(item.price)}</td>
             </tr>`;
             $("#bid-history-body").prepend(newRow);

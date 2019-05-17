@@ -11,7 +11,6 @@ import com.ryulth.auction.pojo.response.ProductListResponse;
 import com.ryulth.auction.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,11 +19,16 @@ import java.util.List;
 @Component
 @Primary
 public class ProductServiceImpl implements ProductService {
-    private static final HttpHeaders httpHeaders = new HttpHeaders();
+
+    private final ObjectMapper objectMapper;
+    private final ProductRepository productRepository;
+
     @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
-    ProductRepository productRepository;
+    public ProductServiceImpl(ObjectMapper objectMapper, ProductRepository productRepository) {
+        this.objectMapper = objectMapper;
+        this.productRepository = productRepository;
+    }
+
     @Override
     public ProductDetailResponse enrollProduct(String payload, User user) throws IOException {
         ProductEnrollRequest productEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -53,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public String  updateProduct(Long productId, String payload) throws IOException {
+    public String updateProduct(Long productId, String payload) throws IOException {
         ProductEnrollRequest productDataRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, ProductEnrollRequest.class);
         Product updateProduct = productRepository.getOne(productId);

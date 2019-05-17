@@ -15,13 +15,16 @@ import java.util.Map;
 @Component
 public class AccountServiceImpl implements AccountService {
     private static Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
+    private final JwtService jwtService;
+    private final RedisTemplate redisTemplate;
+    private final UserRepository userRepository;
+
     @Autowired
-    JwtService jwtService;
-    @Autowired
-    RedisTemplate redisTemplate;
-    @Autowired
-    UserRepository userRepository;
-    private static final String ACCOUNT_TOKEN_REDIS = "ryulth:auction:account:";
+    public AccountServiceImpl(JwtService jwtService, RedisTemplate redisTemplate, UserRepository userRepository) {
+        this.jwtService = jwtService;
+        this.redisTemplate = redisTemplate;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public AccountSignInResponse signIn(NaverSignInRequest naverSignUpRequest) {
@@ -29,13 +32,14 @@ public class AccountServiceImpl implements AccountService {
                 .email(naverSignUpRequest.getEmail())
                 .nickName(naverSignUpRequest.getNickName())
                 .build());
-        if(user.getId() ==null){
+        if (user.getId() == null) {
             logger.info("회원가입");
             userRepository.save(user);
         }
         String token = jwtService.create("user", user, "auction");
         return AccountSignInResponse.builder().jwtToken(token).build();
     }
+
     @Override
     public boolean checkValidation(String token) {
         return jwtService.decode(token);
@@ -43,7 +47,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public User getUser(String token) {
-        Map<String,Object> user = jwtService.get("user",token);
+        Map<String, Object> user = jwtService.get("user", token);
         return userRepository.getOne(Long.valueOf((Integer) user.get("id")));
     }
 }

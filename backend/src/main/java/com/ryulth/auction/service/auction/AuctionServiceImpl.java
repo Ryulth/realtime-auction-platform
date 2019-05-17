@@ -43,18 +43,12 @@ import java.util.stream.Collectors;
 @Primary
 public class AuctionServiceImpl implements AuctionService {
     private static Logger logger = LoggerFactory.getLogger(AuctionServiceImpl.class);
-    @Autowired
-    AuctionRepository auctionRepository;
-    @Autowired
-    ProductRepository productRepository;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RedisTemplate redisTemplate;
-    @Autowired
-    AuctionEventService auctionEventService;
-    @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
+    private final AuctionRepository auctionRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
+    private final RedisTemplate redisTemplate;
+    private final AuctionEventService auctionEventService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final ZoneId zoneId = ZoneId.of("Asia/Seoul");
     private static final String timePattern = "yyyy-MM-dd HH:mm";
@@ -62,6 +56,16 @@ public class AuctionServiceImpl implements AuctionService {
     private static final String AUCTION_TYPE_REDIS = "ryulth:auction:type:";
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
+
+    @Autowired
+    public AuctionServiceImpl(AuctionRepository auctionRepository, ProductRepository productRepository, UserRepository userRepository, RedisTemplate redisTemplate, AuctionEventService auctionEventService, SimpMessagingTemplate simpMessagingTemplate) {
+        this.auctionRepository = auctionRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.redisTemplate = redisTemplate;
+        this.auctionEventService = auctionEventService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     @Override
     public Auction enrollAuction(AuctionEnrollRequest auctionEnrollRequest, User user) {
@@ -76,8 +80,6 @@ public class AuctionServiceImpl implements AuctionService {
         product.setOnSale(1);
         productRepository.save(product);
         ZonedDateTime now = ZonedDateTime.now(zoneId);
-        System.out.println(now.plusMinutes(auctionEnrollRequest.getGoingTime()));
-        System.out.println(auctionEnrollRequest.getGoingTime());
         Auction auction = auctionRepository.findByProductId(productId)
                 .orElse(Auction.builder()
                         .userId(user.getId())
@@ -89,7 +91,7 @@ public class AuctionServiceImpl implements AuctionService {
                         .version(0L)
                         .build());
         auctionRepository.save(auction);
-
+        System.out.println(auction);
         long auctionId = auction.getId();
         AuctionEvent auctionEvent = AuctionEvent.builder()
                 .userId(user.getId())

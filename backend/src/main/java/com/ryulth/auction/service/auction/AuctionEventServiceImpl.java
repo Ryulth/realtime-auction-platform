@@ -28,11 +28,15 @@ import java.util.stream.Collectors;
 @Primary
 public class AuctionEventServiceImpl implements AuctionEventService {
     private static Logger logger = LoggerFactory.getLogger(AuctionEventServiceImpl.class);
-    @Autowired
-    RedisTemplate redisTemplate;
+    private final RedisTemplate redisTemplate;
     private static final ZoneId zoneId = ZoneId.of("Asia/Seoul");
     private static final String AUCTION_EVENTS_REDIS = "ryulth:auction:events:";
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
+
+    @Autowired
+    public AuctionEventServiceImpl(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
     //TODO 중복 코드 제거
 
     @Override
@@ -41,7 +45,7 @@ public class AuctionEventServiceImpl implements AuctionEventService {
         AuctionEvent lastAuctionEvent = auctionEvents.get(auctionEvents.size() - 1);
         ValueOperations vop = redisTemplate.opsForValue();
         boolean onGoing = (boolean) vop.get(AUCTION_ONGOING_REDIS + auctionId);
-        if (onGoing &&lastAuctionEvent.getPrice() < auctionEventRequest.getPrice() ) {
+        if (onGoing && lastAuctionEvent.getPrice() < auctionEventRequest.getPrice()) {
             long newPrice = auctionEventRequest.getPrice();
             long newVersion = lastAuctionEvent.getVersion() + 1;
             AuctionEvent newAuctionEvent = AuctionEvent.builder()
@@ -110,8 +114,9 @@ public class AuctionEventServiceImpl implements AuctionEventService {
                 .auctionEvents(auctionEvents)
                 .build();
     }
+
     @Override
-    public List<AuctionEvent> getAuctionEvents(long auctionId){
+    public List<AuctionEvent> getAuctionEvents(long auctionId) {
         StreamOperations sop = redisTemplate.opsForStream();
         List<ObjectRecord<String, AuctionEvent>> objectRecords = sop
                 .read(AuctionEvent.class, StreamOffset.fromStart(AUCTION_EVENTS_REDIS + auctionId));
@@ -120,6 +125,7 @@ public class AuctionEventServiceImpl implements AuctionEventService {
                 .collect(Collectors.toList());
         return auctionEvents;
     }
+
     private void xAdd(long auctionId, String versionId, AuctionEvent auctionEvent) throws RedisSystemException {
         StreamOperations sop = redisTemplate.opsForStream();
         ObjectRecord<String, AuctionEvent> record = StreamRecords.newRecord()

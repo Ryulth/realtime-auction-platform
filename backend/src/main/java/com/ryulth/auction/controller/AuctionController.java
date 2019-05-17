@@ -27,19 +27,22 @@ import java.io.IOException;
 @RestController
 public class AuctionController {
     private static Logger logger = LoggerFactory.getLogger(AuctionController.class);
-    @Autowired
-    SimpMessagingTemplate simpMessagingTemplate;
-    @Autowired
-    AuctionService auctionService;
-    @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
-    AccountService accountService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final AuctionService auctionService;
+    private final ObjectMapper objectMapper;
+    private final AccountService accountService;
 
     private static final HttpHeaders httpHeaders = new HttpHeaders();
-    public AuctionController(){
+
+    @Autowired
+    public AuctionController(SimpMessagingTemplate simpMessagingTemplate, AuctionService auctionService, ObjectMapper objectMapper, AccountService accountService) {
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.auctionService = auctionService;
+        this.objectMapper = objectMapper;
+        this.accountService = accountService;
     }
+
     @CrossOrigin("*")
     @GetMapping("/auctions")
     public ResponseEntity<AuctionListResponse> getAllAuctions(
@@ -55,7 +58,7 @@ public class AuctionController {
         User user = accountService.getUser(token);
         AuctionEnrollRequest auctionEnrollRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEnrollRequest.class);
-        return new ResponseEntity<>(auctionService.enrollAuction(auctionEnrollRequest,user), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.enrollAuction(auctionEnrollRequest, user), httpHeaders, HttpStatus.OK);
     }
 
     @CrossOrigin("*")
@@ -64,7 +67,7 @@ public class AuctionController {
             @RequestHeader("Authorization") String token,
             @PathVariable("auctionId") Long auctionId) {
         User user = accountService.getUser(token);
-        return new ResponseEntity<>(auctionService.getAuction(auctionId,user), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(auctionService.getAuction(auctionId, user), httpHeaders, HttpStatus.OK);
     }
 
     @CrossOrigin("*")
@@ -83,7 +86,7 @@ public class AuctionController {
         User user = accountService.getUser(token);
         AuctionEventRequest auctionEventRequest = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .readValue(payload, AuctionEventRequest.class);
-        this.simpMessagingTemplate.convertAndSend("/topic/auctions/"+auctionId+"/event",
-                auctionService.eventAuction(auctionId, auctionEventRequest,user));
+        this.simpMessagingTemplate.convertAndSend("/topic/auctions/" + auctionId + "/event",
+                auctionService.eventAuction(auctionId, auctionEventRequest, user));
     }
 }
