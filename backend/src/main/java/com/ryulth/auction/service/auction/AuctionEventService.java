@@ -1,5 +1,7 @@
 package com.ryulth.auction.service.auction;
 
+import com.ryulth.auction.domain.Auction;
+import com.ryulth.auction.domain.Product;
 import com.ryulth.auction.domain.User;
 import com.ryulth.auction.pojo.model.AuctionEvent;
 import com.ryulth.auction.pojo.request.AuctionEventRequest;
@@ -14,5 +16,9 @@ public interface AuctionEventService {
 
     AuctionEventsResponse liveAuctionEvent(long auctionId, AuctionEventRequest auctionEventRequest, User user);
 
+    AuctionEventsResponse firstComeAuctionEvent(Auction auction, AuctionEventRequest auctionEventRequest, User user, Product product);
+
     List<AuctionEvent> getAuctionEvents(long auctionId);
+
+    boolean endEvents(Auction auction);
 }

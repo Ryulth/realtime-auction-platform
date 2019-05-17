@@ -10,7 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -30,6 +29,9 @@ public class Product {
 
     @Column
     private String name;
+
+    @Column
+    private Long count;
 
     @Lob
     @Column(nullable = true)

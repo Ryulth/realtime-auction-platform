@@ -48,7 +48,6 @@ public class AuctionServiceImpl implements AuctionService {
     private final UserRepository userRepository;
     private final RedisTemplate redisTemplate;
     private final AuctionEventService auctionEventService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
 
     private static final ZoneId zoneId = ZoneId.of("Asia/Seoul");
     private static final String timePattern = "yyyy-MM-dd HH:mm";
@@ -58,13 +57,12 @@ public class AuctionServiceImpl implements AuctionService {
     private static final String AUCTION_ONGOING_REDIS = "ryulth:auction:ongoing:";
 
     @Autowired
-    public AuctionServiceImpl(AuctionRepository auctionRepository, ProductRepository productRepository, UserRepository userRepository, RedisTemplate redisTemplate, AuctionEventService auctionEventService, SimpMessagingTemplate simpMessagingTemplate) {
+    public AuctionServiceImpl(AuctionRepository auctionRepository, ProductRepository productRepository, UserRepository userRepository, RedisTemplate redisTemplate, AuctionEventService auctionEventService) {
         this.auctionRepository = auctionRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.redisTemplate = redisTemplate;
         this.auctionEventService = auctionEventService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -161,6 +159,10 @@ public class AuctionServiceImpl implements AuctionService {
                 return auctionEventService.basicAuctionEvent(auctionId, auctionEventRequest, user);
             case LIVE:
                 return auctionEventService.liveAuctionEvent(auctionId, auctionEventRequest, user);
+            case FIRSTCOME:
+                Auction auction = auctionRepository.getOne(auctionId);
+                Product product = productRepository.getOne(auction.getProductId());
+                return auctionEventService.firstComeAuctionEvent(auction,auctionEventRequest,user,product);
             case ERROR:
             default:
                 return null;
@@ -183,28 +185,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(a);
             ValueOperations vop = redisTemplate.opsForValue();
             vop.set(AUCTION_ONGOING_REDIS + a.getId(), false);
-
-
-            AuctionEvent closeEvent = AuctionEvent.builder()
-                    .userId(a.getUserId())
-                    .nickName("Finish")
-                    .auctionEventType(AuctionEventType.CLOSE)
-                    .version(9000000000000000000L) // 구백 이십경 ...
-                    .price(0L)
-                    .eventTime(ZonedDateTime.now(zoneId))
-                    .build();
-            try {
-                xAdd(AUCTION_EVENTS_REDIS + a.getId(), a.getId() + "-" + Long.MAX_VALUE, closeEvent);
-                List<AuctionEvent> auctionEvents = new ArrayList<>();
-                auctionEvents.add(closeEvent);
-                this.simpMessagingTemplate.convertAndSend("/topic/auctions/" + a.getId() + "/event",
-                        AuctionEventsResponse.builder()
-                                .auctionEvents(auctionEvents)
-                                .auctionType(a.getAuctionType())
-                                .build()
-                );
-            } catch (RedisSystemException ignore) {
-            }
+            auctionEventService.endEvents(a);
 
         });
 

@@ -124,6 +124,7 @@ function getAuction() {
             $(".detail-title")[0].innerText = response.product.name;
             $(".start-time")[0].innerText = (new Date(response.auction.startTime)).format('yyyy-MM-dd(KS) HH:mm:ss') + " ~ ";
             $(".end-time")[0].innerText = (new Date(response.auction.endTime)).format('yyyy-MM-dd(KS) HH:mm:ss');
+
             if (lastIndex !== -1) {
                 $(".current-price")[0].innerText = comma(getCurrentPrice(response.auctionEvents, lastIndex));
             }
@@ -197,10 +198,11 @@ function setBiddingTable(auctionEvents) {
     }
     auctionEvents.forEach(function (item, idex, array) {
         if (item.auctionEventType !== "CLOSE") {
+            let itemPrice = (auctionType === "live") ? "+ " +comma(item.price) : comma(item.price);
             let newRow = `<tr>     
             <td>${item.nickName}</td>
             <td>${(new Date(item.eventTime)).format('yyyy-MM-dd(KS) HH:mm:ss')}</td>
-            <td>${comma(item.price)}</td>
+            <td>${itemPrice}</td>
             </tr>`;
             $("#bid-history-body").prepend(newRow);
         }
