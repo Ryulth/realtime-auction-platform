@@ -138,7 +138,7 @@ public class AuctionEventServiceImpl implements AuctionEventService {
                     .nickName(user.getNickName())
                     .eventTime(ZonedDateTime.now(zoneId))
                     .build();
-            while (true) {
+            while (newAuctionEvent.getVersion() <= product.getCount()) {
                 try {
                     xAdd(AUCTION_EVENTS_REDIS + auctionId, auctionId + "-" + newAuctionEvent.getVersion(), newAuctionEvent);
                     break;
