@@ -14,7 +14,7 @@
 
 * WebSocket
 * EventSourcing Pattern
-
+* Jwt Token
 
 
 
