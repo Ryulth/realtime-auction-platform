@@ -15,6 +15,7 @@
 - ETC
   - GIT
   - WebSocket
+  - EventSourcing Pattern
 
 ### 시나리오
 
